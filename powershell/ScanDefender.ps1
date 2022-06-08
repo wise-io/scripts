@@ -15,7 +15,7 @@ Update-MpSignature
 if ($Path) {
   Start-MpScan -ScanType 'Custom' -ScanPath $Path
 }
-elseif ($Type = 'Offline') { 
+elseif ($Type -eq 'Offline') { 
   Start-MpWDOScan 
   exit
 }
