@@ -8,7 +8,10 @@
 * [Web Browsers](group-policy/browsers/README.md)
   * [Browser Management](group-policy/browsers/browser-management.md)
   * [Extension Management](group-policy/browsers/extension-management.md)
-* [Windows Defender](group-policy/windows-defender.md)
+* [Windows Defender](group-policy/windows-defender/README.md)
+  * [Exclusions](group-policy/windows-defender/exclusions.md)
+  * [Run Scans](group-policy/windows-defender/scan.md)
+  * [Settings](group-policy/windows-defender.md)
 
 ## Software Management <a href="#software" id="software"></a>
 
