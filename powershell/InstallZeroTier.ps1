@@ -101,10 +101,9 @@ try {
   if ($Token) { Invoke-RestMethod @Params } else { cmd /c $ZTCLI join $NetworkID }
     
   # Configure ZeroTier client
-  if ($ManageDNS) { $AllowDNS = 1 } else { $AllowDNS = 0 }
-  if ($GlobalRoutes) { $AllowGlobal = 1 } else { $AllowGlobal = 0 }
-  if ($DefaultRoute) { $AllowDefault = 1 } else { $AllowDefault = 0 }
-  cmd /c $ZTCLI set $NetworkID allowDNS=$AllowDNS allowGlobal=$AllowGlobal allowDefault=$AllowDefault | Out-Null
+  if ($ManageDNS) { cmd /c $ZTCLI set $NetworkID allowDNS=1 | Out-Null }
+  if ($GlobalRoutes) { cmd /c $ZTCLI set $NetworkID allowGlobal=1 | Out-Null }
+  if ($DefaultRoute) { cmd /c $ZTCLI set $NetworkID allowDefault=1 | Out-Null }
 }
 catch { throw $Error }
 finally { Remove-Item $Installer -Force -ErrorAction Ignore }
