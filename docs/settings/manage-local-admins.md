@@ -7,7 +7,9 @@ description: PowerShell script to manage local administrators security group mem
 ## Overview
 
 {% hint style="info" %}
-**Note:** This script should be run with administrator or system privileges.
+**Note:** This script may error out on AzureAD joined devices due to [this bug](https://github.com/PowerShell/PowerShell/issues/2996). Please voice your complaints to [Microsoft here](https://aka.ms/AAh5egg).\
+\
+For a potential workaround, [see here](https://github.com/PowerShell/PowerShell/issues/2996#issuecomment-604146661).
 {% endhint %}
 
 **Prerequisites:**&#x20;
