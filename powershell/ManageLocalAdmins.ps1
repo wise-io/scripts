@@ -4,7 +4,7 @@ param(
 
 $Admins += @(
   # Enter your admin users here as follows:
-  # '$env:computername\AdminUser1',
+  # "$env:computername\AdminUser1",
   # 'DOMAIN\AdminUser2',
   # 'AzureAD\AdminUser3'
 )
