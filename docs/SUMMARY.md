@@ -40,6 +40,7 @@
 ## Windows Settings <a href="#settings" id="settings"></a>
 
 * [Create Restore Point](settings/create-restore-point.md)
+* [Manage Local Admins](settings/manage-local-admins.md)
 * [Set Network Type](settings/set-network-type.md)
 
 ## Misc
