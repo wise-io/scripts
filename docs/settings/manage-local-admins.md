@@ -24,7 +24,7 @@ Alternatively, you can pass your admin users at runtime using the `-admins` para
 
 ## Script
 
-**Usage:** `.\ManageLocalAdmins.ps1 -Admins '$env:computername\MSP Name'`
+**Usage:** `.\ManageLocalAdmins.ps1 -Admins "$env:computername\MSP Name"`
 
 {% embed url="https://gist.github.com/wise-io/8b97ea4023d7799b1ef610ee18b15cbd" %}
 
