@@ -16,7 +16,7 @@ Add your list of admin users to the script in the `$Admins` array declaration. Y
 
 **Examples:**
 
-* `'$env:computername\Administrator'`
+* `"$env:computername\Administrator"`
 * `'AzureAD\Administrator'`
 * `'DOMAIN\Administrator'`
 
