@@ -150,7 +150,7 @@ try {
   # Install & Import PolicyFileEditor module
   if (!(Get-Module -ListAvailable -Name 'PolicyFileEditor' -ErrorAction Ignore)) {
     Write-Output 'Installing PolicyFileEditor module...'
-    Install-Module -Name 'PolicyFileEditor'
+    Install-Module -Name 'PolicyFileEditor' -Force
     Import-Module 'PolicyFileEditor'
   }
 
