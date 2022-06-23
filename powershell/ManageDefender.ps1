@@ -123,7 +123,7 @@ try {
   Auditpol /set /category:"Account Management" /Success:enable /Failure:enable | Out-Null
   Auditpol /set /category:"DS Access" /Failure:enable | Out-Null
   Auditpol /set /category:"System" /Failure:enable | Out-Null
-  Write-Output 'Auditing policies set.`n'
+  Write-Output "Auditing policies set.`n"
 
   # Update Policies
   gpupdate /force /wait:0
