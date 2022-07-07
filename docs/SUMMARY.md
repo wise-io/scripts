@@ -31,6 +31,7 @@
   * [LibreOffice](software/uninstallers/libreoffice.md)
   * [Meraki SM](software/uninstallers/meraki-sm.md)
   * [QuickTime](software/uninstallers/quicktime.md)
+  * [Silverlight](software/uninstallers/quicktime-1.md)
   * [WPS Office](software/uninstallers/wps-office.md)
   * [ZeroTier One](software/uninstallers/zerotier-one.md)
 * [Microsoft Office](software/microsoft-office/README.md)
