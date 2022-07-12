@@ -1,4 +1,3 @@
-SplashtopSOS.ps1
 # Downloads Splashtop SOS & creates desktop shortcut
 $Executable = "$env:SystemDrive\Utilities\SplashtopSOS.exe"
 $DownloadURL = 'https://download.splashtop.com/sos/SplashtopSOS.exe'
