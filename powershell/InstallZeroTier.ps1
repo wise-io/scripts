@@ -55,6 +55,7 @@ if ($Token) {
     }
     finally { exit $LASTEXITCODE }
   }
+  else { $PSStyle.OutputRendering = 'PlainText' }
 }
 
 try {
