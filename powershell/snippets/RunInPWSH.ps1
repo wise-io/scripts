@@ -21,3 +21,4 @@ if (!($PSVersionTable.PSVersion.Major -ge 7)) {
   }
   finally { exit $LASTEXITCODE }
 }
+else { $PSStyle.OutputRendering = 'PlainText' }
