@@ -1,0 +1,2 @@
+# Locks computer
+rundll32.exe user32.dll,LockWorkStation
