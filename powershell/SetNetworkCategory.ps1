@@ -1,5 +1,4 @@
 # Sets current network category (type) to Public or Private.
-# Should be run with Administrator privileges.
 
 param (
   [Parameter (Mandatory = $true)]
