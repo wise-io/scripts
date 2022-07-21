@@ -18,3 +18,5 @@ if ($VirtualNetworkPort) {
     cmd /c $Uninst /qn
   }
 }
+
+Write-Output 'Uninstall complete. Restart recommended before reinstall.'
