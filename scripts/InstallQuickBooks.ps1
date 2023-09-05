@@ -38,6 +38,7 @@ Function Confirm-SystemCheck {
     exit 1
   }
 }
+
 Function Install-XPSDocumentWriter {
   $XPSFeature = Get-WindowsOptionalFeature -Online | Where-Object { $_.FeatureName -eq 'Printing-XPSServices-Features' }
   if ($XPSFeature.State -eq 'Disabled') {
@@ -52,6 +53,7 @@ Function Install-XPSDocumentWriter {
     }
   }
 }
+
 Function Install-QuickBooks {
   param(
     [Parameter(Mandatory = $True, ValueFromPipeline = $True, ValueFromPipelineByPropertyName = $True)]
@@ -81,6 +83,7 @@ Function Install-QuickBooks {
   }
   finally { Remove-Item $Installer -Force -ErrorAction Ignore }
 }
+
 Function Install-ToolHub {
   $ToolHubURL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/QBFDT/QuickBooksToolHub.exe'
   $Exe = ($ToolHubURL -Split '/')[-1]
