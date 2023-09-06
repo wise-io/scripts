@@ -128,7 +128,7 @@ $QBVersions = @(
   # QuickBooks Pro
   [PSCustomObject]@{Name = 'QuickBooks Pro 2023'; ProductNumber = '401228'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksProSub2023.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2022'; ProductNumber = '917681'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2022/Latest/QuickBooksProSub2022.exe'; }
-  #[PSCustomObject]@{Name = 'QuickBooks Pro 2021'; ProductNumber = ''; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksPro2021.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Pro 2021'; ProductNumber = '222750'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksPro2021.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2020'; ProductNumber = '748990'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2020/Latest/QuickBooksPro2020.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2019'; ProductNumber = '589041'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksPro2019.exe'; }
 
