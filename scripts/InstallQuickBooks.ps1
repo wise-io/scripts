@@ -44,7 +44,7 @@ Function Install-XPSDocumentWriter {
   if ($XPSFeature.State -eq 'Disabled') {
     try {
       Write-Output "`nInstalling required PDF components (Microsoft XPS Document Writer)..."
-      Enable-WindowsOptionalFeature -Online -FeatureName 'Printing-XPSServices-Features' -All | Out-Null
+      Enable-WindowsOptionalFeature -Online -FeatureName 'Printing-XPSServices-Features' -All -NoRestart | Out-Null
       Write-Output 'Installation complete.'
     }
     catch {
