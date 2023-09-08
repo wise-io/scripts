@@ -138,9 +138,9 @@ $QBVersions = @(
   [PSCustomObject]@{Name = 'QuickBooks Premier 2021'; ProductNumber = '622091'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksPremier2021.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Premier 2020'; ProductNumber = '247211'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2020/Latest/QuickBooksPremier2020.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Premier 2019'; ProductNumber = '355957'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksPremier2019.exe'; }
-
+  
   # QuickBooks Enterprise
-  [PSCustomObject]@{Name = 'QuickBooks Enterprise 23'; ProductNumber = '538185'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksEnterprise23.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Enterprise 23'; ProductNumber = '916783'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksEnterprise23.exe'; }
   
   # QuickBooks Enterprise Accountant
   [PSCustomObject]@{Name = 'QuickBooks Enterprise 23 - Accountant'; ProductNumber = '334562'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksEnterprise23.exe'; }
