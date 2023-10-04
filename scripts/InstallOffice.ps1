@@ -16,7 +16,7 @@
 
 param (
   [Alias('Configure')][String]$Config, # File path to custom configuration xml
-  [Alias('32bit')][Switch]$x86 # Installs Office 32-bit (ignored if -Config is used)
+  [Alias('32', '32bit')][Switch]$x86 # Installs Office 32-bit (ignored if -Config is used)
 )
 
 function Get-ODT {
@@ -39,9 +39,11 @@ function Get-ODT {
 }
 
 function Set-ConfigXML {
-
   if ($Config) {
-    if (Test-Path $Config) { $Script:ConfigFile = $Config }
+    if (Test-Path $Config) { 
+      $Script:ConfigFile = $Config 
+      Write-Output 'Provided configuration file will be used for installation.'
+    }
     else {
       Write-Warning 'The configuration XML file path is not valid or is inaccessible.'
       Write-Warning 'Please check the path and try again.'
@@ -53,35 +55,8 @@ function Set-ConfigXML {
     if (!(Test-Path -PathType Container $Path)) {
       New-Item -ItemType Directory -Path $Path | Out-Null
     }
-
-    if ($x86 -or !(([Environment]::Is64BitOperatingSystem))) {
-      $XML = [XML]@'
-  <Configuration ID="5cf809c5-8f36-4fea-a837-69c7185cca8a">
-    <Remove All="TRUE"/>
-    <Add OfficeClientEdition="32" Channel="Current" MigrateArch="TRUE">
-      <Product ID="O365BusinessRetail">
-        <Language ID="en-us"/>
-        <ExcludeApp ID="Groove"/>
-        <ExcludeApp ID="Lync"/>
-      </Product>
-    </Add>
-    <Property Name="SharedComputerLicensing" Value="0"/>
-    <Property Name="FORCEAPPSHUTDOWN" Value="TRUE"/>
-    <Property Name="DeviceBasedLicensing" Value="0"/>
-    <Property Name="SCLCacheOverride" Value="0"/>
-    <Updates Enabled="TRUE"/>
-    <RemoveMSI/>
-    <AppSettings>
-      <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas"/>
-      <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas"/>
-      <User Key="software\microsoft\office\16.0\word\options" Name="defaultformat" Value="" Type="REG_SZ" App="word16" Id="L_SaveWordfilesas"/>
-    </AppSettings>
-    <Display Level="Full" AcceptEULA="TRUE"/>
-  </Configuration>
-'@
-    }
-    else {
-      $XML = [XML]@'
+    
+    $XML = [XML]@'
   <Configuration ID="5cf809c5-8f36-4fea-a837-69c7185cca8a">
     <Remove All="TRUE"/>
     <Add OfficeClientEdition="64" Channel="Current" MigrateArch="TRUE">
@@ -105,7 +80,12 @@ function Set-ConfigXML {
     <Display Level="Full" AcceptEULA="TRUE"/>
   </Configuration>
 '@
+
+    if ($x86 -or !([Environment]::Is64BitOperatingSystem)) {
+      $OfficeClientEdition = $XML.SelectSingleNode('//Add[@OfficeClientEdition]')
+      $OfficeClientEdition.SetAttribute('OfficeClientEdition', '32')
     }
+    
     $XML.Save("$Script:ConfigFile")
   }
 }
@@ -126,7 +106,7 @@ function Install-Office {
 function Remove-OfficeHub {
   $AppName = 'Microsoft.MicrosoftOfficeHub'
   try {
-    Write-Output "Removing [$AppName] (Microsoft Store App)..."
+    Write-Output "`nRemoving [$AppName] (Microsoft Store App)..."
     Get-AppxProvisionedPackage -Online | Where-Object { ($AppName -contains $_.DisplayName) } | Remove-AppxProvisionedPackage -AllUsers | Out-Null
     Get-AppxPackage -AllUsers | Where-Object { ($AppName -contains $_.Name) } | Remove-AppxPackage -AllUsers
   }
@@ -140,8 +120,12 @@ $Script:ODT = "$env:temp\ODT"
 $Script:ConfigFile = "$Script:ODT\office-config.xml"
 $Script:Installer = "$env:temp\ODTSetup.exe"
 
+# Adjust PowerShell settings
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop'
+if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls13') {
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+}
 
 Get-ODT 
 Set-ConfigXML
