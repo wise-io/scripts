@@ -130,9 +130,12 @@ $QBVersions = @(
   [PSCustomObject]@{Name = 'QuickBooks Pro 2022'; ProductNumber = '917681'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2022/Latest/QuickBooksProSub2022.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2021'; ProductNumber = '222750'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksPro2021.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2020'; ProductNumber = '748990'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2020/Latest/QuickBooksPro2020.exe'; }
-  [PSCustomObject]@{Name = 'QuickBooks Pro 2019'; ProductNumber = '589041'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksPro2019.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Pro 2019'; ProductNumber = '102058'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksPro2019.exe'; }
 
-  # QuickBooks Premier
+  # QuickBooks Pro Accountant
+  [PSCustomObject]@{Name = 'QuickBooks Pro 2019 - Accountant'; ProductNumber = '589041'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksPro2019.exe'; }
+
+  # QuickBooks Premier Accountant
   [PSCustomObject]@{Name = 'QuickBooks Premier 2023'; ProductNumber = '757611'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksPremierSub2023.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Premier 2022'; ProductNumber = '747060'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2022/Latest/QuickBooksPremier2022.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Premier 2021'; ProductNumber = '622091'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksPremier2021.exe'; }
@@ -141,6 +144,10 @@ $QBVersions = @(
   
   # QuickBooks Enterprise
   [PSCustomObject]@{Name = 'QuickBooks Enterprise 23'; ProductNumber = '916783'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksEnterprise23.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Enterprise 22'; ProductNumber = '029966'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2022/Latest/QuickBooksEnterprise22.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Enterprise 21'; ProductNumber = '176962'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2021/Latest/QuickBooksEnterprise21.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Enterprise 20'; ProductNumber = '194238'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2020/Latest/QuickBooksEnterprise20.exe'; }
+  [PSCustomObject]@{Name = 'QuickBooks Enterprise 19'; ProductNumber = '490580'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2019/Latest/QuickBooksEnterprise19.exe'; }
   
   # QuickBooks Enterprise Accountant
   [PSCustomObject]@{Name = 'QuickBooks Enterprise 23 - Accountant'; ProductNumber = '334562'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksEnterprise23.exe'; }
