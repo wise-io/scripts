@@ -57,7 +57,8 @@ function Install-DCU {
     }
     catch { 
       Write-Warning 'Unable to install Dell Command Update.'
-      Write-Warning 'Please verify the below link is valid:'
+      Write-Warning $_
+      Write-Warning "`nPlease verify the below link is valid:"
       Write-Warning $DownloadURL
       exit 1
     }
@@ -79,6 +80,7 @@ function Invoke-DCU {
   }
   catch {
     Write-Warning 'Unable to apply updates using the dcu-cli.'
+    Write-Warning $_
     exit 1
   }
 }
