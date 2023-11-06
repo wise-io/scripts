@@ -125,6 +125,11 @@ if ($Cache) { $Cache = $Cache.TrimEnd('\') }
 $ProductNumbers = ($ProductNumbers -replace '-', '' -replace ' ', '').Split(',')
 
 $QBVersions = @(
+  
+  # Add additional versions
+  # Get download url from https://downloads.quickbooks.com/app/qbdt/products
+  # [PSCustomObject]@{Name = 'QuickBooks [Flavor] [Year]'; ProductNumber = '[Product Number]'; URL = '[Download URL]'; }
+
   # QuickBooks Pro
   [PSCustomObject]@{Name = 'QuickBooks Pro 2023'; ProductNumber = '401228'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2023/Latest/QuickBooksProSub2023.exe'; }
   [PSCustomObject]@{Name = 'QuickBooks Pro 2022'; ProductNumber = '917681'; URL = 'https://dlm2.download.intuit.com/akdlm/SBD/QuickBooks/2022/Latest/QuickBooksProSub2022.exe'; }
