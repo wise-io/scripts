@@ -2,11 +2,10 @@
   .SYNOPSIS
     Installs WMF 5.1 and necessary prerequisites.
   .DESCRIPTION
-    Installs Windows Management framework and its necessary prerequisites to enable PowerShell 5.1 for easier device management.
+    Installs Windows Management Framework and its necessary prerequisites to enable PowerShell 5.1 for easier device management.
     Supported OS: Windows Server 2012 R2, Windows Server 2012, Windows Server 2008 R2, Windows 8.1, Windows 7 SP1
   .NOTES
     Author: Aaron Stevenson
-    Date: 7/20/23
 #>
 #Requires -Version 4.0
 
