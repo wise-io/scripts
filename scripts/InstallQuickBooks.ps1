@@ -6,13 +6,13 @@
   .EXAMPLE
     InstallQuickBooks.ps1 -Cache "\\SERVER\QuickBooks\Installers" -ProductNumbers 757-611,334-562 -ToolHub
   .PARAMETER Cache
-    Directory path to QuickBooks installers. If not provided, installers will be downloaded from Intuit.
+    Optional - Directory path to QuickBooks installers. If not provided, installers will be downloaded from Intuit.
   .PARAMETER LicenseNumber
-    License number to use for QuickBooks installations. If not provided, '0000-0000-0000-000' will be used.
+    Optional - License number to use for QuickBooks installations. If not provided, '0000-0000-0000-000' will be used.
   .PARAMETER ProductNumbers
-    Array parameter that accepts product numbers for the versions of QuickBooks you want to install.
+    Required - Array parameter that accepts product numbers for the versions of QuickBooks you want to install.
   .PARAMETER ToolHub
-    Switch parameter to install QuickBooks ToolHub.
+    Optional - Switch parameter to install QuickBooks ToolHub.
   .NOTES
     Author: Aaron J. Stevenson
 #>
