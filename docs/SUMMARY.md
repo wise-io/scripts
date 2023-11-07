@@ -11,8 +11,8 @@
 ## Device Management
 
 * [Backups](device-management/backups/README.md)
-  * [Windows Restore Point](device-management/backups/windows-restore-point.md)
   * [SQL Databases](device-management/backups/sql-databases.md)
+  * [Windows Restore Point](device-management/backups/windows-restore-point.md)
 * [Updates](device-management/updates/README.md)
   * [Dell Command Update](device-management/updates/dell-command-update.md)
   * [Microsoft Office](device-management/updates/microsoft-office.md)
