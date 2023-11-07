@@ -4,7 +4,7 @@
   .DESCRIPTION
     Enables System Protection on all local drives and creates a System Restore Point.
   .EXAMPLE
-    ./CreateRestorePoint.ps1 -Description 'Installed Quickbooks'
+    .\CreateRestorePoint.ps1 -Description 'Installed Quickbooks'
   .NOTES
     Author: Aaron Stevenson
 #>
