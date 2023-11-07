@@ -1,4 +1,11 @@
-# Install all Windows updates
+<#
+  .SYNOPSIS
+    Installs all Windows updates
+  .DESCRIPTION
+    Installs all Windows updates silently without reboot.
+  .NOTES
+    Author: Aaron Stevenson
+#>
 function Install-PSModule {
   param(
     [Parameter(Position = 0, Mandatory = $true)]
