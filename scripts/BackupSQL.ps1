@@ -100,10 +100,12 @@ function Start-SqlBackups {
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop'
 
+# Get Sql Instances
+$Instances = Get-SqlInstances
+
 # Get modules
 Install-PSModule -Modules @('SqlServer')
 
 # Backup SQL databases in all instances on localhost
-$Instances = Get-SqlInstances
 if ($AuditOnly) { Get-SqlBackupAudit }
 else { Start-SqlBackups }
