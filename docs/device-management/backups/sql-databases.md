@@ -10,7 +10,9 @@ description: PowerShell script to create backups of all SQL databases on a devic
 **Dev Insight:** This script was written to provide SQL backups to clients using [**SQL Express**](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) with a backup solution that doesn't natively support SQL. **It is designed to be used on a schedule in tandem with a file/image-based backup solution.**
 {% endhint %}
 
-This script can be used to automate the creation of SQL database backups.
+This script uses the [SqlServer](https://www.powershellgallery.com/packages/SqlServer) module to automate the creation of SQL database backups.
+
+{% embed url="https://www.powershellgallery.com/packages/SqlServer" %}
 
 **Prerequisites:**&#x20;
 

@@ -12,6 +12,8 @@ description: PowerShell script to silently install Bluebeam Revu (v21+).
 
 This script downloads and installs the latest version of Bluebeam Revu.&#x20;
 
+{% embed url="https://www.bluebeam.com/" %}
+
 **Prerequisites:** This script has no prerequisites.&#x20;
 
 **Notes:**
@@ -39,9 +41,3 @@ This example downloads and installs the latest version of Bluebeam Revu.
 ## Parameters
 
 This script has no parameters.
-
-***
-
-## Links
-
-{% embed url="https://www.bluebeam.com/" %}

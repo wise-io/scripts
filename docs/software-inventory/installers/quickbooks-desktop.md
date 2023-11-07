@@ -12,6 +12,10 @@ description: PowerShell script to silently install multiple versions of QuickBoo
 
 This script uses the provided Product Numbers to download and install multiple versions of QuickBooks desktop in a single pass. It is most useful for deployment of new devices for accountants, who often have requirements to maintain multiple versions of QuickBooks desktop.
 
+{% embed url="https://downloads.quickbooks.com/app/qbdt/products" %}
+Download QuickBooks Desktop
+{% endembed %}
+
 **Prerequisites:**
 
 1. Collect the Product & License Numbers for the versions of QuickBooks you will be installing.
@@ -91,13 +95,3 @@ String parameter that allows you to supply the QuickBooks License Number (with o
 `-ToolHub`
 
 Switch parameter that can be used to install the [QuickBooks Tool Hub](https://quickbooks.intuit.com/learn-support/en-us/help-article/login-password/fix-common-problems-errors-quickbooks-desktop-tool/L3Yab5gNN\_US\_en\_US) application alongside QuickBooks.
-
-***
-
-## Links
-
-{% embed url="https://downloads.quickbooks.com/app/qbdt/products" %}
-Download QuickBooks Desktop
-{% endembed %}
-
-{% embed url="https://quickbooks.intuit.com/learn-support/en-us/help-article/login-password/fix-common-problems-errors-quickbooks-desktop-tool/L3Yab5gNN_US_en_US" %}
