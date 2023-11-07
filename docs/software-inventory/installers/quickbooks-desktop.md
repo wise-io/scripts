@@ -51,8 +51,9 @@ This example uses only the required parameter, `ProductNumbers` (alias `ID`) to 
 
 ### Example 2
 
-<pre class="language-powershell"><code class="lang-powershell"><strong>.\InstallQuickBooks.ps1 -Cache '\\SERVER\QuickBooks Installers' -License 1234-5678-9101-234 -ID 401-228,917-681 -ToolHub
-</strong></code></pre>
+```powershell
+.\InstallQuickBooks.ps1 -Cache '\\SERVER\QuickBooks Installers' -License 1234-5678-9101-234 -ID 401-228,917-681 -ToolHub
+```
 
 This example, in addition to the required `ProductNumbers` (alias `ID`) parameter, uses the available optional parameters to install QuickBooks Pro 2022 & QuickBooks Pro 2023.
 
