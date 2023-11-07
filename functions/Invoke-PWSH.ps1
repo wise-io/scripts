@@ -1,5 +1,5 @@
 Function Invoke-PWSH {
-    <#
+  <#
   .SYNOPSIS
     Relaunches the current script in PowerShell 7+ (pwsh)
   .DESCRIPTION
