@@ -66,6 +66,13 @@ function Install-PSModule {
   }
 }
 
+function Get-SqlInstances {
+  try { return (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server').InstalledInstances }
+  catch { 
+    Write-Warning 'Unable to detect SQL instances.'
+    exit 1
+  }
+}
 function Get-SqlBackupAudit {
   foreach ($Instance in $Instances) {
     Write-Output "`nBackup history for localhost\$Instance (past month):"
@@ -89,9 +96,14 @@ function Start-SqlBackups {
   Write-Output 'Backup jobs complete.' 
 }
 
+# Set PowerShell preferences
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+# Get modules
 Install-PSModule -Modules @('SqlServer')
 
 # Backup SQL databases in all instances on localhost
-$Instances = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server').InstalledInstances
+$Instances = Get-SqlInstances
 if ($AuditOnly) { Get-SqlBackupAudit }
 else { Start-SqlBackups }
