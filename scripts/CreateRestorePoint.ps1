@@ -13,26 +13,36 @@ param (
   [string]$Description = 'Scripted Checkpoint'
 ) 
 
-$ErrorActionPreference = 'Stop'
-
-$RegKey = 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\SystemRestore'
-$RegProperty = 'SystemRestorePointCreationFrequency'
-$RegValue = (Get-ItemProperty -Path $RegKey -Name $RegProperty -ErrorAction SilentlyContinue).$RegProperty
-
-try {
-  # Enable System Protection
-  $LocalDrives = Get-CimInstance -Class 'Win32_LogicalDisk' | Where-Object { $_.DriveType -eq 3 } | Select-Object -ExpandProperty DeviceID
-  Enable-ComputerRestore -Drive $LocalDrives
-
-  # Create Checkpoint
-  Set-ItemProperty -Path $RegKey -Name $RegProperty -Value 0
-  Checkpoint-Computer -Description $Description -RestorePointType MODIFY_SETTINGS
-  if ($RegValue) { Set-ItemProperty -Path $RegKey -Name $RegProperty -Value $RegValue }
-  else { Remove-ItemProperty -Path $RegKey -Name $RegProperty }
-  Write-Output 'Checkpoint created.'
+function Enable-SystemProtection {
+  try {
+    Enable-ComputerRestore -Drive $env:SystemDrive
+    Write-Output "`nSystem Protection enabled for [$env:SystemDrive]"
+  }
+  catch { 
+    Write-Warning "Unable to enable System Protection for [$env:SystemDrive]"
+    Write-Warning $_
+    exit 1
+  }
 }
-catch { 
-  Write-Warning $_
-  Write-Warning 'Unable to create checkpoint.'
-  exit 1
+
+function Start-SystemCheckpoint {
+  $RegKey = 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\SystemRestore'
+  $RegProperty = 'SystemRestorePointCreationFrequency'
+
+  try {
+    $RegValue = (Get-ItemProperty -Path $RegKey -Name $RegProperty -ErrorAction SilentlyContinue).$RegProperty
+    Set-ItemProperty -Path $RegKey -Name $RegProperty -Value 0
+    Checkpoint-Computer -Description $Description -RestorePointType MODIFY_SETTINGS
+    if ($RegValue) { Set-ItemProperty -Path $RegKey -Name $RegProperty -Value $RegValue }
+    else { Remove-ItemProperty -Path $RegKey -Name $RegProperty }
+    Write-Output "Checkpoint created."
+  }
+  catch { 
+    Write-Warning 'Unable to create checkpoint.'
+    Write-Warning $_
+    exit 1
+  }
 }
+
+Enable-SystemProtection
+Start-SystemCheckpoint
