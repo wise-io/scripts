@@ -6,10 +6,6 @@ description: PowerShell script to cleanly install Microsoft Office.
 
 ## Overview
 
-{% hint style="info" %}
-**Dev Insight:**&#x20;
-{% endhint %}
-
 This script uses the Office Deployment Tool (ODT) to perform a clean install of Microsoft Office with a configuration xml file. For convenience, it includes a built-in xml file that will install **Microsoft Office 365 Apps for Business** if a configuration file is not specified.
 
 {% embed url="https://learn.microsoft.com/en-us/deployoffice/overview-office-deployment-tool" %}
