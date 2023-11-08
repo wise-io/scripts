@@ -32,12 +32,14 @@ This library is a repository of PowerShell scripts designed for use by my fellow
 
 * An overview of the script
 * Prerequisites to running the script, if applicable
+* Examples for executing the script
+* Documentation for all script parameters
 
 **Notes:**
 
 PowerShell scripts included in this library are built for and tested against **Windows 10 or later**, which include **PowerShell 5.1**. Earlier versions of Windows / PowerShell will be missing cmdlets or cmdlet parameters that were introduced in later versions.
 
-Scripts shared with :heart: by **Aaron Stevenson**.
+Scripts shared with :heart: by **Aaron J. Stevenson**.
 
 {% hint style="info" %}
 Banner image created by **Olivia Xu** at [Microsoft Design](https://microsoft.design/).
