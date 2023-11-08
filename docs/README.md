@@ -2,7 +2,7 @@
 description: >-
   The shared script library is a repository of RMM agnostic scripts that can be
   used by MSPs to automate tasks and manage client devices.
-cover: .gitbook/assets/03-DevHome_DM-4K.png
+cover: .gitbook/assets/ssl-banner-small.png
 coverY: 0
 layout:
   cover:
