@@ -40,7 +40,7 @@ While this script has no parameters, the `PSWindowsUpdate` module has many. I ha
 **Module Version:** 2.2.0.3
 {% endhint %}
 
-{% code fullWidth="false" %}
+{% code overflow="wrap" fullWidth="true" %}
 ```powershell
 PS C:\Users\aaron> Get-Help Get-WindowsUpdate -Detailed
 
