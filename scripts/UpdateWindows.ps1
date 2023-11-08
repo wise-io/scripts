@@ -6,6 +6,7 @@
   .NOTES
     Author: Aaron Stevenson
 #>
+
 function Install-PSModule {
   param(
     [Parameter(Position = 0, Mandatory = $true)]
@@ -52,4 +53,4 @@ function Install-PSModule {
 # Update Windows
 $Modules = @('PSWindowsUpdate')
 Install-PSModule $Modules
-Get-WindowsUpdate -AcceptAll -Install -IgnoreReboot
+Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -IgnoreReboot
