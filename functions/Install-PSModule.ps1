@@ -13,7 +13,8 @@ function Install-PSModule {
 
   Write-Output "`nChecking for necessary PowerShell modules..."
   try {
-    # Set PowerShell to TLS 1.2 (https://devblogs.microsoft.com/powershell/powershell-gallery-tls-support/)
+    # Adjust PowerShell settings
+    $ProgressPreference = 'SilentlyContinue'
     if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls13') {
       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     }
@@ -39,7 +40,7 @@ function Install-PSModule {
       }
     }
 
-    Write-Output 'Modules installed successfully.'
+    Write-Output 'Necessary modules installed.'
   }
   catch { 
     Write-Warning 'Unable to install modules.'
