@@ -28,12 +28,12 @@ layout:
 
 This library is a repository of PowerShell scripts designed for use by my fellow **IT Managed Service Providers** (MSPs), primarily geared towards smaller MSPs (including one-person shops). Internal IT teams may also find the scripts useful.
 
-**Each Script Page Includes:**
+**Each script page includes:**
 
-* An overview of the script
-* Prerequisites to running the script, if applicable
-* Examples for executing the script
-* Documentation for all script parameters
+* An overview of the script.
+* Prerequisites to running the script.
+* Examples for executing the script.
+* Documentation for all script parameters.
 
 **Notes:**
 
