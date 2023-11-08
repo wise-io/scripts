@@ -6,10 +6,6 @@ description: PowerShell script to silently install Windows updates.
 
 ## Overview
 
-{% hint style="info" %}
-**Dev Insight:** This script was extremely useful when patching for [CVE-2020-23397](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-23397).
-{% endhint %}
-
 This script uses the [PSWindowsUpdate](https://www.powershellgallery.com/packages/PSWindowsUpdate) module to apply Windows updates silently, ignoring reboots. It also applies updates to installed Microsoft products.
 
 {% embed url="https://www.powershellgallery.com/packages/PSWindowsUpdate" %}
@@ -34,7 +30,7 @@ This example installs the `PSWindowsUpdate` module, checks for all Windows updat
 
 ## Parameters
 
-While this script has no parameters, the `PSWindowsUpdate` module has many. I have included `Get-Help` output for reference.
+While this script has no parameters, the `PSWindowsUpdate` module has many. I have included `Get-Help` output on parameters for reference.
 
 {% hint style="info" %}
 **Module Version:** 2.2.0.3
