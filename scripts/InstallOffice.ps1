@@ -5,18 +5,24 @@
     Installs Microsoft Office 365 using a default configuration xml, unless a custom xml is provided.
     WARNING: This script will remove all existing office installations if used with the default configuration xml.
   .PARAMETER Config
+    Parameter Set: Custom
     File path to custom configuration xml for office installations.
   .PARAMETER x86
-    Switch parameter to install 32-bit Office applications. Ignored if -Config is used.
+    Parameter Set: Builtin
+    Switch parameter to install 32-bit Office applications with the built-in XML.
   .LINK
     XML Configuration Generator: https://config.office.com/
   .NOTES
     Author: Aaron J. Stevenson
 #>
 
+[CmdletBinding(DefaultParameterSetName = 'None')]
 param (
-  [Alias('Configure')][String]$Config, # File path to custom configuration xml
-  [Alias('32', '32bit')][Switch]$x86 # Installs Office 32-bit (ignored if -Config is used)
+  [Parameter(ParameterSetName = 'Custom')]
+  [Alias('Configure')][String]$Config,
+
+  [Parameter(ParameterSetName = 'Builtin')]
+  [Alias('32', '32bit')][Switch]$x86
 )
 
 function Get-ODT {
