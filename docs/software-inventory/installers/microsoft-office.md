@@ -73,4 +73,4 @@ String parameter that allows you to provide a file path to an office configurati
 
 Switch parameter that allows the installation of the 32-bit version of Microsoft Office 365.&#x20;
 
-**Note:** This parameter is ignored when used with `-Config`.
+**Note:** This parameter cannot be used with `-Config`.
