@@ -62,7 +62,8 @@ function Install-DCU {
     }
 
     # Check for DCU CLI
-    if (Test-Path $DCU) { Write-Output "Dell Command Update [$Version] installed." }
+    $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
+    if ($DCU) { Write-Output "Dell Command Update [$Version] installed." }
     else {
       Write-Warning 'Dell Command Update CLI was not detected.'
       exit 1
@@ -82,8 +83,6 @@ function Invoke-DCU {
     exit 1
   }
 }
-
-$DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
 
 # Set PowerShell preferences
 Set-Location -Path $env:SystemRoot
