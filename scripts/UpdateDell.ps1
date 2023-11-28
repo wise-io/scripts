@@ -83,7 +83,7 @@ function Invoke-DCU {
   }
 }
 
-$DCU = "$env:ProgramFiles\Dell\CommandUpdate\dcu-cli.exe"
+$DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
 
 # Set PowerShell preferences
 Set-Location -Path $env:SystemRoot
