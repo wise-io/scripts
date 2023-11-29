@@ -25,7 +25,7 @@ param(
   [String]$LicenseNumber = '0000-0000-0000-000',
 
   [Parameter(Mandatory = $true)]
-  [Alias('ID', 'Product', 'ProductNumber')]
+  [Alias('ID', 'Product', 'Products', 'ProductNumber')]
   [String[]]$ProductNumbers,
 
   [Switch]$ToolHub
