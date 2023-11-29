@@ -71,7 +71,7 @@ The `ToolHub` parameter is used to install [QuickBooks ToolHub](https://quickboo
 
 `-ProductNumbers`
 
-**Aliases:** `-ID`, `-Product`, `-ProductNumber`
+**Aliases:** `-ID`, `-Product`, `-Products`, `-ProductNumber`
 
 Array parameter that accepts multiple QuickBooks Product Numbers with or without dashes. Supplied Product Numbers will be compared with the `$QBVersions` array to determine which versions of QuickBooks to install.
 
