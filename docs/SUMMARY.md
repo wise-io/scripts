@@ -9,6 +9,7 @@
   * [Google Chrome](software-inventory/installers/google-chrome.md)
   * [Microsoft Office](software-inventory/installers/microsoft-office.md)
   * [QuickBooks Desktop](software-inventory/installers/quickbooks-desktop.md)
+  * [Synology Active Backup](software-inventory/installers/synology-active-backup.md)
 
 ## Device Management
 
