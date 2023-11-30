@@ -7,7 +7,7 @@
     Author: Aaron J. Stevenson
 #>
 
-$DownloadURL = 'https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi'
+$DownloadURL = 'https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi'
 $Installer = Join-Path -Path $env:TEMP -ChildPath ($DownloadURL -Split '/')[-1]
 
 if ([Environment]::Is64BitOperatingSystem) { 
