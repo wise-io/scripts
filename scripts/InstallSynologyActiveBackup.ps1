@@ -16,9 +16,9 @@
 #>
 
 param(
-  [String]$Address,
-  [String]$Username,
-  [String]$Pass
+  [Alias('Host', 'Hostname', 'IP')][String]$Address,
+  [Alias('User')][String]$Username,
+  [Alias('Password')][String]$Pass
 )
 
 $Installer = "$env:TEMP\ActiveBackupForBusiness.msi"
