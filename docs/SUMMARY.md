@@ -6,6 +6,7 @@
 
 * [Installers](software-inventory/installers/README.md)
   * [Bluebeam Revu](software-inventory/installers/bluebeam-revu.md)
+  * [Google Chrome](software-inventory/installers/google-chrome.md)
   * [Microsoft Office](software-inventory/installers/microsoft-office.md)
   * [QuickBooks Desktop](software-inventory/installers/quickbooks-desktop.md)
 
