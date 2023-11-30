@@ -16,8 +16,13 @@
 #>
 
 param(
+  [Parameter(Mandatory = $true)]
   [Alias('Host', 'Hostname', 'IP')][String]$Address,
+
+  [Parameter(Mandatory = $true)]
   [Alias('User')][String]$Username,
+
+  [Parameter(Mandatory = $true)]
   [Alias('Password')][String]$Pass
 )
 
