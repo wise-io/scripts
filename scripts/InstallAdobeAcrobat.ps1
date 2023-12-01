@@ -2,8 +2,7 @@
   .SYNOPSIS
     Installs Adobe Acrobat DC
   .DESCRIPTION
-    Downloads and installs Acrobat as a unified application that provides the functionality
-    of Adobe Reader or Adobe Acrobat depending on the user's license.
+    Downloads and installs Adobe Acrobat DC silently.
   .PARAMETER Path
     Optional - Local path to cached zip archive containing Adobe Acrobat installation files.
   .NOTES
@@ -39,14 +38,21 @@ if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.S
 
 try {
   # Retrieve Setup Files
-  if ($Path) { Copy-Item -Path $Path -Destination $Archive }
-  else { Invoke-WebRequest -Uri $DownloadURL -OutFile $Archive }
+  if ($Path) { 
+    Write-Output 'Copying Adobe Acrobat installation files from cache...'
+    Copy-Item -Path $Path -Destination $Archive
+  }
+  else { 
+    Write-Output 'Downloading Adobe Acrobat...'
+    Invoke-WebRequest -Uri $DownloadURL -OutFile $Archive
+  }
   
-  # Extract Installer
+  Write-Output 'Extracting files...'
   Expand-Archive -Path $Archive -DestinationPath $env:temp -Force
 
-  # Install Acrobat     
+  Write-Output 'Installing...'   
   Start-Process -Wait -FilePath $Installer -ArgumentList '/sAll /rs /msi EULA_ACCEPT=YES'
+  Write-Output 'Installation complete.'
 }
 catch { 
   Write-Warning 'There was an issue installing Adobe Acrobat.'
