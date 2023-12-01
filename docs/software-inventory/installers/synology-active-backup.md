@@ -2,6 +2,22 @@
 description: >-
   PowerShell script to silently install the latest Synology Active Backup for
   Business agent.
+cover: ../../.gitbook/assets/activebackup_1607392921_1.png
+coverY: 0
+layout:
+  cover:
+    visible: true
+    size: full
+  title:
+    visible: true
+  description:
+    visible: true
+  tableOfContents:
+    visible: true
+  outline:
+    visible: true
+  pagination:
+    visible: true
 ---
 
 # Synology Active Backup
@@ -12,11 +28,17 @@ description: >-
 **Dev Insight:** This script can also be used to update or reconfigure the Synology Active Backup for business agent.
 {% endhint %}
 
-Synology NAS devices offer a built-in option for device backups known as Active Backup for Business. It can be used to manage backup tasks for physical and virtual environments from a centralized dashboard to keep data and services always available.
-
-This script eases the deployment of the backup agent for Windows devices by silently downloading, installing, and configuring the agent on a device.
+The software applications available for Synology devices can be pretty powerful. One of my favorites, especially for internal IT, is Active Backup for Business (ABB).
 
 {% embed url="https://www.synology.com/en-global/dsm/feature/active-backup-business/overview" %}
+
+**From their** [**Administrator's Guide**](https://global.synologydownload.com/download/Document/Software/AdminGuide/Package/ActiveBackup/All/enu/Synology\_ABB\_admin\_guide\_Windows\_PC\_PS\_enu.pdf)**:**
+
+> Synology's all-in-one commercial data protection solution, **Active Backup for Business (ABB)**, is based on the award-winning DSM operating system. ABB centralizes data protection across a variety of IT environments, including virtual machines, physical servers, file servers, and personal computers. Administrators can deploy their preferred protection plan single-handedly through ABB's centralized admin console.&#x20;
+>
+> ABB also offers a wide range of backup options and restoration tools, as well as a number of optional technical and safety features.
+
+This script eases the deployment of the backup agent for Windows devices by silently downloading, installing, and configuring the agent on a device.
 
 **Prerequisites:**
 
