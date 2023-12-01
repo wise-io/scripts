@@ -42,8 +42,6 @@ This example enables automatic updates for Microsoft Store applications. It then
 
 ## Parameters
 
-### Optional Parameters
-
 `-AutoUpdate`
 
-Switch parameter that enables automatic updates for Microsoft Store applications.
+Optional switch parameter that enables automatic updates for Microsoft Store applications.

@@ -111,8 +111,6 @@ This example displays database backups performed in the last month. It does not 
 
 ## Parameters
 
-### Optional Parameters
-
 `-AuditOnly`
 
-Switch parameter that outputs a history of all database backups for the last month. No additional backups are performed when using this parameter.
+Optional switch parameter that outputs a history of all database backups for the last month. No additional backups are performed when using this parameter.

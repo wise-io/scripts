@@ -63,7 +63,7 @@ This example utilizes the provided XML configuration file to determine which Mic
 
 `-Config`
 
-String parameter that allows you to provide a file path to an office configuration xml. This XML will be used to determine what Microsoft Office products to install or remove.
+Optional string parameter that allows you to provide a file path to an office configuration xml. This XML will be used to determine what Microsoft Office products to install or remove.
 
 
 
@@ -71,6 +71,6 @@ String parameter that allows you to provide a file path to an office configurati
 
 **Aliases:** `-32`, `-32bit`
 
-Switch parameter that allows the installation of the 32-bit version of Microsoft Office 365.&#x20;
+Optional switch parameter that allows the installation of the 32-bit version of Microsoft Office 365, even on 64-bit systems.&#x20;
 
 **Note:** This parameter cannot be used with `-Config`.

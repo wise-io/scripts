@@ -44,8 +44,6 @@ This example creates a restore point with the description "Installed QuickBooks"
 
 ## Parameters
 
-### Optional Parameters
-
 `-Description`
 
-String parameter that allows you to set a description for the restore point. If not provided, a default description of "Scripted Checkpoint" will be used.
+Optional string parameter that allows you to set a description for the restore point. If not provided, a default description of "Scripted Checkpoint" will be used.

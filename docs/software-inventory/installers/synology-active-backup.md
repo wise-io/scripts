@@ -51,8 +51,6 @@ This script eases the deployment of the backup agent for Windows devices by sile
 
 ## Examples
 
-### Example 1
-
 ```powershell
 .\InstallSynologyActiveBackup.ps1 -Address "localhost" -Username "Backups" -Pass "Da ba dee da ba di"
 ```
@@ -65,13 +63,11 @@ This example downloads, installs, and configures the latest version of Synology 
 
 ## Parameters
 
-### Required Parameters
-
 `-Address`
 
 **Aliases:** `-Host`, `-Hostname`, `-IP`
 
-The hostname or IP address of the Synology Active Backup for Business server.
+Required string paramter that allows passing the hostname or IP address of the Synology device.
 
 
 
@@ -79,7 +75,7 @@ The hostname or IP address of the Synology Active Backup for Business server.
 
 **Aliases:** `-User`
 
-The username used to authenticate with the Synology Active Backup for Business server.
+Required string parameter that allows you to pass the username required to authenticate with the Synology device.
 
 
 
@@ -87,5 +83,5 @@ The username used to authenticate with the Synology Active Backup for Business s
 
 **Aliases:** `-Password`
 
-The password used to authenticate with the Synology Active Backup for Business server.
+Required string parameter that allows you to pass the password required to authenticate with the Synology device.
 
