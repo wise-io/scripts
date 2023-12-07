@@ -33,7 +33,7 @@ The software applications available for Synology devices can be pretty powerful.
 >
 > ABB also offers a wide range of backup options and restoration tools, as well as a number of optional technical and safety features.
 
-{% embed url="https://www.synology.com/en-global/dsm/feature/active-backup-business/overview" %}
+{% embed url="https://www.synology.com/en-us/dsm/feature/active-backup-business/overview" fullWidth="false" %}
 
 This script eases the deployment of the backup agent for Windows devices by silently downloading, installing, and configuring the agent on a device.
 
