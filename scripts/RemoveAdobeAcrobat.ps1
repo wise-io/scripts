@@ -27,7 +27,7 @@ function Remove-Apps {
       if ($App.UninstallString) {
         $DisplayName = $App.DisplayName
         $Uninst = $App.UninstallString -replace 'MsiExec.exe /I', ''
-        Write-Output "Uninstalling $DisplayName..."
+        Write-Output "`nUninstalling $DisplayName..."
         Start-Process -Wait msiexec -ArgumentList "/x $Uninst /qn"
         Write-Output 'Application removed.'
       }
