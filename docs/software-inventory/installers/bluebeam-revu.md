@@ -26,7 +26,7 @@ This script downloads and installs the latest version of Bluebeam Revu.&#x20;
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/InstallBluebeamRevu.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallBluebeamRevu.ps1" %}
 
 ## Examples
 

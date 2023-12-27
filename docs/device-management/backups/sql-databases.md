@@ -46,7 +46,7 @@ After database permissions are set, you can deploy the script via your RMM.
 Backups are not performed on databases named `tempdb.`
 {% endhint %}
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/BackupSQL.ps1" %}
+{% @github-files/github-code-block %}
 
 ## Examples
 

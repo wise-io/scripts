@@ -24,7 +24,7 @@ This script will check for ClickToRun installations of Microsoft Office. If foun
 Script will abort if no ClickToRun installations of Microsoft Office are detected.
 {% endhint %}
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/UpdateOffice.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/UpdateOffice.ps1" %}
 
 ## Examples
 

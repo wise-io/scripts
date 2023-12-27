@@ -20,7 +20,7 @@ This script downloads and installs the latest version of Google Chrome.
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/InstallGoogleChrome.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallGoogleChrome.ps1" %}
 
 ## Examples
 

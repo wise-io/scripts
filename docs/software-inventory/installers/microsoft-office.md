@@ -29,7 +29,7 @@ This script uses the Office Deployment Tool (ODT) to perform a clean install of 
 Script will remove existing installations of Microsoft Office when used with the default configuration file.
 {% endhint %}
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/InstallOffice.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallOffice.ps1" %}
 
 ## Examples
 

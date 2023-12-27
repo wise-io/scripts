@@ -30,7 +30,7 @@ This script downloads and installs the latest version of Dell Command Update (DC
 Script will abort if a PC manufacturer other than Dell is detected.
 {% endhint %}
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/UpdateDell.ps1" %}
+{% @github-files/github-code-block %}
 
 ## Examples
 

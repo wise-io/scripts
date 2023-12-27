@@ -23,7 +23,7 @@ This script downloads and installs the necessary Windows Update files to update 
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/UpdateWMF.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/UpdateWMF.ps1" %}
 
 ## Examples
 

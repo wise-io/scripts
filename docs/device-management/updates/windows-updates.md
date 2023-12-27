@@ -16,7 +16,7 @@ This script uses the [PSWindowsUpdate](https://www.powershellgallery.com/package
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/UpdateWindows.ps1" fullWidth="false" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/UpdateWindows.ps1" %}
 
 ## Examples
 

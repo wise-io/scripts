@@ -47,7 +47,7 @@ This script eases the deployment of the backup agent for Windows devices by sile
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/InstallSynologyActiveBackup.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallSynologyActiveBackup.ps1" %}
 
 ## Examples
 

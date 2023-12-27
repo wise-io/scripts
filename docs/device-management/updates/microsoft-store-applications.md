@@ -18,7 +18,7 @@ This script allows you to set Microsoft Store applications to update automatical
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/UpdateMicrosoftStoreApps.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/UpdateMicrosoftStoreApps.ps1" %}
 
 ## Examples
 

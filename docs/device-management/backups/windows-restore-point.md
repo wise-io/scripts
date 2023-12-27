@@ -20,7 +20,7 @@ This script can be used to automate the creation of System Restore Points on cli
 
 ## Script
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/CreateRestorePoint.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/CreateRestorePoint.ps1" %}
 
 ## Examples
 

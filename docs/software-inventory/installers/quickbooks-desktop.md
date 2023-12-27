@@ -37,7 +37,7 @@ Download QuickBooks Desktop
 Script will abort if run as SYSTEM; it must be run as an administrative user.
 {% endhint %}
 
-{% @github-files/github-code-block url="https://github.com/redletterone/PowerShell/blob/main/scripts/InstallQuickBooks.ps1" %}
+{% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallQuickBooks.ps1" %}
 
 ## Examples
 
