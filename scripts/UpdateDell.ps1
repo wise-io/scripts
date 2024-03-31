@@ -60,18 +60,17 @@ function Install-DCU {
       Write-Warning $_
       exit 1
     }
-
-    # Check for DCU CLI
-    $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
-    if ($DCU) { Write-Output "Dell Command Update [$Version] installed." }
-    else {
-      Write-Warning 'Dell Command Update CLI was not detected.'
-      exit 1
-    }
   }
 }
 
 function Invoke-DCU {
+  # Check for DCU CLI
+  $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
+  if (!$DCU) {
+    Write-Warning 'Dell Command Update CLI was not detected.'
+    exit 1
+  }
+  
   try {
     cmd /c "$DCU" /configure -updatesNotification=disable -userConsent=disable -scheduleAuto -silent
     cmd /c "$DCU" /scan -silent
