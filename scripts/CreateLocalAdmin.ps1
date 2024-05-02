@@ -7,6 +7,8 @@
     Required parameter - Username for the new local admin account.
   .PARAMETER Path
     Optional parameter - Path to .txt file containing the password for the new account in plaintext.
+  .EXAMPLE
+    .\CreateLocalAdmin.ps1 -user 'SudoGuy' -Path 'C:\Temp\passfile.txt'
   .NOTES
     Author: Aaron J. Stevenson
 #>
