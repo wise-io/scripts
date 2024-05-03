@@ -24,7 +24,7 @@ param(
       if ($_ -notmatch '\.txt$') { throw 'The file specified in the path argument must be type txt' }
       return $true
     })]
-  [Alias('PathToPasswordFile')]
+  [Alias('File', 'PathToPasswordFile')]
   [System.IO.FileInfo]$Path
 )
 try {
