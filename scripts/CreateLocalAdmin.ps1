@@ -6,7 +6,7 @@
   .PARAMETER User
     Required parameter - Username for the new local admin account.
   .PARAMETER Path
-    Optional parameter - Path to .txt file containing the password for the new account in plaintext.
+    Optional parameter - Path to .txt file containing the password for the new account in plaintext. If provided, the file will be deleted by this script.
   .EXAMPLE
     .\CreateLocalAdmin.ps1 -user 'SudoGuy' -Path 'C:\Temp\passfile.txt'
   .NOTES
