@@ -26,9 +26,9 @@ param (
 )
 
 function Get-ODT {
-  [String]$MSWebPage = Invoke-RestMethod 'https://www.microsoft.com/en-us/download/confirmation.aspx?id=49117'
+  [String]$MSWebPage = Invoke-RestMethod 'https://www.microsoft.com/en-us/download/details.aspx?id=49117'
   $Script:ODTURL = $MSWebPage | ForEach-Object {
-    if ($_ -match 'url=(https://.*officedeploymenttool.*\.exe)') { $Matches[1] }
+    if ($_ -match '.*href="(https://download.microsoft.com.*officedeploymenttool.*\.exe)"') { $Matches[1] }
   }
 
   try {
