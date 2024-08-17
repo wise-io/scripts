@@ -38,7 +38,7 @@ function Get-DownloadURL {
   $Headers = @{
     'accept'          = 'text/html'
     'accept-encoding' = 'gzip, deflate, br, zstd'
-    'accept-language' = 'en-US,en;q=0.9'
+    'accept-language' = '*'
   }
   [String]$DellWebPage = Invoke-RestMethod -UseBasicParsing -Uri $DellURL -Headers $Headers
   if ($DellWebPage -match '(https://www\.dell\.com.*driverId=[a-zA-Z0-9]*)') { 
