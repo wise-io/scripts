@@ -8,8 +8,8 @@
 #>
 
 # Local group policy files
-$PolicyFiles = $env:SystemRoot + '\System32\GroupPolicy'
-$PolicyUserFiles = $env:SystemRoot + '\System32\GroupPolicyUsers'
+$PolicyFiles = "$env:SystemRoot\System32\GroupPolicy"
+$PolicyUserFiles = "$env:SystemRoot\System32\GroupPolicyUsers"
 
 function Backup-Policies {
   # Define variables for policy backups
