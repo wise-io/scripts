@@ -22,3 +22,5 @@
   * [Microsoft Store Applications](device-management/updates/microsoft-store-applications.md)
   * [Windows Management Framework](device-management/updates/windows-management-framework.md)
   * [Windows Updates](device-management/updates/windows-updates.md)
+* [Misc](device-management/misc/README.md)
+  * [Reset Local Group Policy](device-management/misc/reset-local-group-policy.md)
