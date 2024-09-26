@@ -10,7 +10,7 @@ description: >-
 
 This script creates a backup of the files stored in `C:\Windows\System32\GroupPolicy` and `C:\Windows\System32\GroupPolicyUsers`. After the backup is created, the script will delete the existing files to reset all locally set Group Policy Objects to "Not Configured".
 
-By default, backups are stored in `C:\Backups\Group Policy`.&#x20;
+By default, backups are stored in `C:\Backups\Group Policy`. To restore a backup, simply delete the existing GroupPolicy and GroupPolicyUsers folders in System32, if they exist. Then copy the versions from the backup directory back into System32 and run `gpupdate /force`.
 
 **Prerequisites:** This script has no prerequisites.&#x20;
 
