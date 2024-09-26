@@ -18,7 +18,9 @@ By default, backups are stored in `C:\Backups\Group Policy`.&#x20;
 
 ## Script
 
-
+{% hint style="info" %}
+**Note:** This script has no effect on Group Policy Objects applied from Active Directory.
+{% endhint %}
 
 {% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/ResetLocalPolicies.ps1" %}
 
