@@ -53,3 +53,4 @@ function Reset-Policies {
 $ErrorActionPreference = 'Stop'
 Backup-Policies
 Reset-Policies
+exit $LASTEXITCODE
