@@ -13,10 +13,44 @@ param ([switch]$Force)
 
 $DownloadURL = 'https://www.terminalworks.com/downloads/tsprint/TSPrint_client.exe'
 $Installer = "$env:temp\TSPrint_client.exe"
-$RegPaths = (
-  'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
-  'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
-)
+
+function Get-InstallStatus {
+  param(
+    [Parameter(Mandatory = $true)]
+    [String]$Name
+  )
+
+  $RegPaths = (
+    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+  )
+
+  # Wait for registry to update
+  Start-Sleep -Seconds 5
+
+  $Program = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -match $Name } | Select-Object
+  if ($Program) { Write-Output "`nInstalled $Name [$($Program.DisplayVersion)]" }
+  else { Write-Warning "`n$Name not detected." }
+}
+
+function Install-TSPrintClient {
+  try {
+    Write-Output "`nDownloading TSPrint Client..."
+    Invoke-WebRequest -Uri $DownloadURL -OutFile $Installer
+  
+    Write-Output 'Installing...'
+    Start-Process -Wait $Installer -ArgumentList '/VERYSILENT /NORESTART'
+    Get-InstallStatus 'TSPrint Client'
+  }
+  catch {
+    Write-Warning 'Unable to install TSPrint Client.'
+    Write-Warning $_
+  }
+  finally { 
+    Remove-Item -Path $Installer -Force -ErrorAction SilentlyContinue
+    exit $LASTEXITCODE
+  }
+}
 
 function Stop-RDP {
   # Check for active RDP sessions
@@ -32,29 +66,6 @@ function Stop-RDP {
   elseif ($RDP) {
     Write-Output "`nActive RDP sessions detected. Aborting installation."
     exit 1
-  }
-}
-
-function Install-TSPrintClient {
-  try {
-    Write-Output "`nDownloading TSPrint Client..."
-    Invoke-WebRequest -Uri $DownloadURL -OutFile $Installer
-  
-    Write-Output 'Installing...'
-    Start-Process -Wait $Installer -ArgumentList '/VERYSILENT /NORESTART'
-  
-    # Check for TSPrint Client
-    $TSPrintClient = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like 'TSPrint Client' } | Select-Object
-    if ($TSPrintClient) { Write-Output "TSPrint Client [$($TSPrintClient.DisplayVersion)] successfully installed." }
-    else { Write-Warning 'TSPrint Client not detected after install.' }
-  }
-  catch {
-    Write-Warning 'Unable to install TSPrint Client.'
-    Write-Warning $_
-  }
-  finally { 
-    Remove-Item -Path $Installer -Force -ErrorAction SilentlyContinue
-    exit $LASTEXITCODE
   }
 }
 
