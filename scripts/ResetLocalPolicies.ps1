@@ -47,10 +47,10 @@ function Reset-Policies {
   catch {
     Write-Warning 'Error resetting local group policies.'
     Write-Warning $_
+    exit 1
   }
 }
 
 $ErrorActionPreference = 'Stop'
 Backup-Policies
 Reset-Policies
-exit $LASTEXITCODE
