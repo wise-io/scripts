@@ -37,7 +37,7 @@ try {
 }
 catch {
   Write-Error 'Could not download the Installation Assistant.'
-  Exit 1
+  exit 1
 }
 
 # Run Installation Assistant
@@ -48,5 +48,5 @@ try {
 }
 catch {
   Write-Error 'The Windows 11 Installation Assistant failed.'
-  Exit 1
+  exit 1
 }
