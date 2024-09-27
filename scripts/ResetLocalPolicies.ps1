@@ -28,6 +28,7 @@ function Backup-Policies {
   catch {
     Write-Warning 'Error creating backup.'
     Write-Warning $_
+    exit 1
   }
 }
 
