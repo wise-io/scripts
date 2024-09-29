@@ -12,7 +12,7 @@
 #>
 
 param(
-  [ValidatePattern('^[a-z]{32}$', ErrorMessage = 'Invalid ID - extension ID should be 32 character alphabetical string')]
+  [ValidatePattern('^[a-z]{32}$')]
   [Parameter(Mandatory = $true)]
   [String]$ID
 )
@@ -50,7 +50,7 @@ function Install-Extension {
     New-Item -Path $ExtRegKey -Force | Out-Null
     New-ItemProperty -Path $ExtRegKey -Name 'update_url' -PropertyType 'String' -Value $UpdateURL -Force | Out-Null
 
-    Write-Output 'Complete - relaunch Chrome to finish installation.'
+    Write-Output 'Complete - relaunch browser to finish installation.'
   }
   catch {
     Write-Warning "Unable to install Chrome Extension [$ID]"
