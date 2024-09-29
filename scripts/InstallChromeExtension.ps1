@@ -24,10 +24,8 @@ function Find-Policies {
   $PolicyRegPath = @('HKLM:\Software\Policies\Google\Chrome\ExtensionInstallBlocklist')
   
   try {
-    if (Test-Path $PolicyRegPath) {
-      if ($null -ne (Get-ItemProperty -Path $PolicyRegPath)) {
-        Write-Warning ('Detected Group Policy settings for Google Chrome extensions - manually check for conflicts.') 
-      }
+    if ((Test-Path $PolicyRegPath) -and ($null -ne (Get-ItemProperty -Path $PolicyRegPath))) {
+      Write-Warning ('Detected Group Policy settings for Google Chrome extensions - manually check for conflicts.') 
     }
   }
   catch {
