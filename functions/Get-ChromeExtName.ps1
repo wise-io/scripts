@@ -3,18 +3,18 @@ function Get-ChromeExtName {
   .SYNOPSIS
     Gets the name of a Chrome extension using the extension ID
   .EXAMPLE
-    Get-ChromeExtName -ID 'ghbmnnjooekpmoecnnnilnnbdlolhkhi'
+    Get-ChromeExtName -ExtID 'ghbmnnjooekpmoecnnnilnnbdlolhkhi'
   #>
   param(
     [ValidatePattern('^[a-z]{32}$')]
     [Parameter(Mandatory = $true)]
-    [String]$ID
+    [String]$ExtID
   )
   
   $ProgressPreference = 'SilentlyContinue'
 
   # Fetch extension webpage
-  $URL = "https://chromewebstore.google.com/detail/$ID"
+  $URL = "https://chromewebstore.google.com/detail/$ExtID"
   try { $Data = Invoke-WebRequest -Uri $URL } catch { }
 
   # Find title and format
