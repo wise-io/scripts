@@ -56,7 +56,6 @@ function Install-Extension {
     Write-Warning "Unable to install Chrome Extension [$ID]"
     throw $_
   }
-
 }
 
 Find-Policies
