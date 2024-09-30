@@ -1,7 +1,7 @@
 function Get-ChromeExtName {
   <#
   .SYNOPSIS
-    Gets the name of a Chrome xxtension using the extension ID
+    Gets the name of a Chrome extension using the extension ID
   .EXAMPLE
     Get-ChromeExtName -ID 'ghbmnnjooekpmoecnnnilnnbdlolhkhi'
   #>
