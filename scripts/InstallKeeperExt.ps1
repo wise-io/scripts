@@ -9,6 +9,8 @@
     ./InstallKeeperExt.ps1 -Force
   .NOTES
     Author: Aaron Stevenson
+  .LINK
+    https://www.keepersecurity.com/
 #>
 
 param([Switch]$Force)
