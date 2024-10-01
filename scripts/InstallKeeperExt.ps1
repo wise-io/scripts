@@ -80,6 +80,7 @@ function Install-Extensions {
         $ForcePolicyPath = "HKLM:\Software\Policies\$($Ext.Reg)\ExtensionInstallForcelist"
         $Forced = $false 
         $Max = 1
+        $PropertyValue = "$($Ext.ID);$($Ext.UpdateURL)"
         
         # Check if force install extension policies exist
         if (!(Test-Path $ForcePolicyPath)) { New-Item -Path $ForcePolicyPath | Out-Null }
@@ -88,11 +89,11 @@ function Install-Extensions {
           $Max = ($ForcePolicy | Select-Object -ExpandProperty property | Sort-Object -Descending)[0]
           
           # Check if extension has already been added to force install list
-          if ((Get-ItemPropertyValue -Path $ForcePolicyPath -Name $ForcePolicy.property) -match $Ext.ID) { $Forced = $true }
+          if ((Get-ItemPropertyValue -Path $ForcePolicyPath -Name $ForcePolicy.property) -match $PropertyValue) { $Forced = $true }
         }
 
         # Add extension to force install list 
-        if (!$Forced) { New-ItemProperty -Path $ForcePolicyPath -Name ($Max + 100) -PropertyType 'String' -Value $Ext.ID | Out-Null }
+        if (!$Forced) { New-ItemProperty -Path $ForcePolicyPath -Name ($Max + 100) -PropertyType 'String' -Value $PropertyValue | Out-Null }
       }
     }
     catch {
