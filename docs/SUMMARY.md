@@ -2,13 +2,13 @@
 
 * [Overview](README.md)
 
-## Software Inventory Management <a href="#software-inventory" id="software-inventory"></a>
+## Software
 
-* [Installers](software-inventory/installers/README.md)
-  * [Bluebeam Revu](software-inventory/installers/bluebeam-revu.md)
-  * [Google Chrome](software-inventory/installers/google-chrome.md)
-  * [Microsoft Office](software-inventory/installers/microsoft-office.md)
-  * [QuickBooks Desktop](software-inventory/installers/quickbooks-desktop.md)
+* [Installers](software/installers/README.md)
+  * [Bluebeam Revu](software/installers/bluebeam-revu.md)
+  * [Google Chrome](software/installers/google-chrome.md)
+  * [Microsoft Office](software/installers/microsoft-office.md)
+  * [QuickBooks Desktop](software/installers/quickbooks-desktop.md)
 
 ## Device Management
 
