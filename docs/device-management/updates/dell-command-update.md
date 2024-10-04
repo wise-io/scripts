@@ -20,7 +20,7 @@ This script downloads and installs the latest version of Dell Command Update (DC
 
 * Script will abort if a PC manufacturer other than Dell is detected.
 * Incompatible products, such as Dell Update, will be removed if detected.
-* Dell Command Update will not work for Dell servers.
+* Dell Command Update is not intended for use with server hardware. Use Dell System Update instead.
 
 ***
 
