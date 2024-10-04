@@ -12,14 +12,19 @@ function Get-EdgeExtName {
   )
   
   $ProgressPreference = 'SilentlyContinue'
-
+  
   # Fetch extension webpage
   $URL = "https://microsoftedge.microsoft.com/addons/detail/$ExtID"
-  try { $Data = Invoke-WebRequest -Uri $URL -Method Get } catch { }
-
+  try { $Data = Invoke-WebRequest -Uri $URL -UseBasicParsing } catch { }
+  
   # Find title and format
-  $ExtName = $Data.ParsedHtml.Title -replace ' - Microsoft Edge Addons', ''
+  [Regex]$Regex = '(?<=<title>)([\S\s]*?)(?=<\/title>)'
+  $ExtName = $Regex.Match($Data.Content).Value -replace ' - Microsoft Edge Addons', ''
   if (($ExtName -eq '') -or ($ExtName -eq 'Microsoft Edge Addons')) { $ExtName = 'Unknown Extension' }
-
+  else {
+    Add-Type -AssemblyName System.Web
+    $ExtName = [System.Web.HttpUtility]::HtmlDecode($ExtName)
+  }
+  
   return $ExtName
 }
