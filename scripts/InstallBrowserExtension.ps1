@@ -90,7 +90,7 @@ function Install-Extension {
       
       # Check if force install extension policies exist
       if (!(Test-Path $ForceInstallKey)) { New-Item -Path $ForceInstallKey -Force | Out-Null }
-      else {
+      elseif ($null -ne (Get-ItemProperty $ForceInstallKey)) {
         # Check if extension has already been added to force install list
         $ForcePolicy = Get-Item -Path $ForceInstallKey
         $Max = ($ForcePolicy | Select-Object -ExpandProperty property | Sort-Object -Descending)[0]

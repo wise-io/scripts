@@ -84,10 +84,10 @@ function Install-Extensions {
         
         # Check if force install extension policies exist
         if (!(Test-Path $ForcePolicyPath)) { New-Item -Path $ForcePolicyPath -Force | Out-Null }
-        else {
+        elseif ($null -ne (Get-ItemProperty $ForcePolicyPath)) {
           $ForcePolicy = Get-Item -Path $ForcePolicyPath
           $Max = ($ForcePolicy | Select-Object -ExpandProperty property | Sort-Object -Descending)[0]
-          
+
           # Check if extension has already been added to force install list
           if ((Get-ItemPropertyValue -Path $ForcePolicyPath -Name $ForcePolicy.property) -match $PropertyValue) { $Forced = $true }
         }
