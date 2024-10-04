@@ -34,8 +34,36 @@ function Find-Policies {
   }
 }
 
+function Get-ChromeExtName {
+  param(
+    [ValidatePattern('^[a-z]{32}$')]
+    [Parameter(Mandatory = $true)]
+    [String]$ExtID
+  )
+  
+  $ProgressPreference = 'SilentlyContinue'
+
+  # Fetch extension webpage
+  $URL = "https://chromewebstore.google.com/detail/$ExtID"
+  try { $Data = Invoke-WebRequest -Uri $URL -UseBasicParsing } catch { }
+
+  # Find title and format
+  [Regex]$Regex = '(?<=og:title" content=")([\S\s]*?)(?=">)'
+  $ExtName = $Regex.Match($Data.Content).Value -replace ' - Chrome Web Store', ''
+  if (($ExtName -eq '') -or ($ExtName -eq 'Chrome Web Store')) { $ExtName = 'Unknown Extension' }
+  else {
+    Add-Type -AssemblyName System.Web
+    $ExtName = [System.Web.HttpUtility]::HtmlDecode($ExtName)
+  }
+
+  return $ExtName
+}
+
 function Install-Extension {
-  Write-Output "`nInstalling Google Chrome Extension from Chrome Web Store"
+  
+  $Name = Get-ChromeExtName -ExtID $ID
+  
+  Write-Output "`nInstalling $Name"
   Write-Output "ID: $ID"
   Write-Output "Link: https://chromewebstore.google.com/detail/$ID"
 
