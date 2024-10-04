@@ -14,7 +14,8 @@
 param(
   [ValidatePattern('^[a-z]{32}$')]
   [Parameter(Mandatory = $true)]
-  [String]$ID
+  [String]$ID,
+  [Switch]$Force
 )
 
 $UpdateURL = 'https://edge.microsoft.com/extensionwebstorebase/v1/crx'
@@ -60,7 +61,6 @@ function Get-EdgeExtName {
 }
 
 function Install-Extension {
-  
   $Name = Get-EdgeExtName -ExtID $ID
   
   Write-Output "`nInstalling $Name"
@@ -77,6 +77,29 @@ function Install-Extension {
     $ExtRegKey = Join-Path -Path $RegPath -ChildPath $ID
     New-Item -Path $ExtRegKey -Force | Out-Null
     New-ItemProperty -Path $ExtRegKey -Name 'update_url' -PropertyType 'String' -Value $UpdateURL -Force | Out-Null
+
+    # Force install extension
+    if ($Force) {
+      Write-Output 'Adding to force installed Edge extensions...'
+
+      $ForcePolicyPath = 'HKLM:\Software\Policies\Microsoft\Edge\ExtensionInstallForcelist'
+      $Forced = $false 
+      $Max = 1
+      [String]$PropertyValue = "$ID;$UpdateURL"
+            
+      # Check if force install extension policies exist
+      if (!(Test-Path $ForcePolicyPath)) { New-Item -Path $ForcePolicyPath -Force | Out-Null }
+      else {
+        $ForcePolicy = Get-Item -Path $ForcePolicyPath
+        $Max = ($ForcePolicy | Select-Object -ExpandProperty property | Sort-Object -Descending)[0]
+              
+        # Check if extension has already been added to force install list
+        if ((Get-ItemPropertyValue -Path $ForcePolicyPath -Name $ForcePolicy.property) -match $PropertyValue) { $Forced = $true }
+      }
+    
+      # Add extension to force install list 
+      if (!$Forced) { New-ItemProperty -Path $ForcePolicyPath -Name ($Max + 100) -PropertyType 'String' -Value $PropertyValue | Out-Null }
+    }
 
     Write-Output 'Complete - relaunch browser to finish installation.'
   }
