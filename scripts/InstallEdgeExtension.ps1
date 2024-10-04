@@ -34,8 +34,36 @@ function Find-Policies {
   }
 }
 
+function Get-EdgeExtName {
+  param(
+    [ValidatePattern('^[a-z]{32}$')]
+    [Parameter(Mandatory = $true)]
+    [String]$ExtID
+  )
+  
+  $ProgressPreference = 'SilentlyContinue'
+  
+  # Fetch extension webpage
+  $URL = "https://microsoftedge.microsoft.com/addons/detail/$ExtID"
+  try { $Data = Invoke-WebRequest -Uri $URL -UseBasicParsing } catch { }
+  
+  # Find title and format
+  [Regex]$Regex = '(?<=<title>)([\S\s]*?)(?=<\/title>)'
+  $ExtName = $Regex.Match($Data.Content).Value -replace ' - Microsoft Edge Addons', ''
+  if (($ExtName -eq '') -or ($ExtName -eq 'Microsoft Edge Addons')) { $ExtName = 'Unknown Extension' }
+  else {
+    Add-Type -AssemblyName System.Web
+    $ExtName = [System.Web.HttpUtility]::HtmlDecode($ExtName)
+  }
+  
+  return $ExtName
+}
+
 function Install-Extension {
-  Write-Output "`nInstalling Microsoft Edge Extension"
+  
+  $Name = Get-EdgeExtName -ExtID $ID
+  
+  Write-Output "`nInstalling $Name"
   Write-Output "ID: $ID"
   Write-Output "Link: https://microsoftedge.microsoft.com/addons/detail/$ID"
 
