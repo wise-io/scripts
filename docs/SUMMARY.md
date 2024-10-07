@@ -10,6 +10,8 @@
   * [Google Chrome](software/installers/google-chrome.md)
   * [Microsoft Office](software/installers/microsoft-office.md)
   * [QuickBooks Desktop](software/installers/quickbooks-desktop.md)
+* [Uninstallers](software/uninstallers/README.md)
+  * [Browser Extension](software/uninstallers/browser-extension.md)
 
 ## Device Management
 
