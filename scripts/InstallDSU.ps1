@@ -10,9 +10,10 @@
 #>
 
 function Invoke-PreinstallChecks {
-  # Check PC manufacturer
-  if ((Get-WmiObject win32_bios).Manufacturer -notlike '*Dell*') {
-    Write-Output 'Not a Dell system. Aborting...'
+  # Check manufacturer / model
+  $DeviceInfo = Get-CimInstance -ClassName Win32_ComputerSystem
+  if (($DeviceInfo.Manufacturer -notlike '*Dell*') -or ($DeviceInfo.Model -notlike '*PowerEdge*')) {
+    Write-Output 'Not a Dell server. Aborting...'
     exit 0
   }
 }
