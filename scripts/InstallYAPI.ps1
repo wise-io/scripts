@@ -84,8 +84,8 @@ function Install-YAPI {
     
     # Add Firewall exclusions after removing duplicates
     Get-NetFirewallApplicationFilter -Program $Program -ErrorAction Ignore | Remove-NetFirewallRule | Out-Null
-    New-NetFirewallRule -DisplayName 'YAPI Runtime (TCP-In)' -Direction 'Inbound' -Program $Program -Protocol 'TCP' -Action 'Allow' -Profile 'Domain,Private' | Out-Null
-    New-NetFirewallRule -DisplayName 'YAPI Runtime (UDP-In)' -Direction 'Inbound' -Program $Program -Protocol 'UDP' -Action 'Allow' -Profile 'Domain,Private' | Out-Null
+    New-NetFirewallRule -DisplayName 'YAPI Runtime (TCP-In)' -Group 'YAPI' -Direction 'Inbound' -Program $Program -Protocol 'TCP' -Action 'Allow' -Profile 'Domain,Private' | Out-Null
+    New-NetFirewallRule -DisplayName 'YAPI Runtime (UDP-In)' -Group 'YAPI' -Direction 'Inbound' -Program $Program -Protocol 'UDP' -Action 'Allow' -Profile 'Domain,Private' | Out-Null
 
     # Modify application shortcut to run as administrator
     Set-ShortcutRunAsAdmin -Path 'C:\Users\Public\Desktop\YAPI.lnk'
