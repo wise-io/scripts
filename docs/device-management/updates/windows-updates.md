@@ -8,7 +8,7 @@ description: PowerShell script to silently install Windows updates.
 
 This script uses the [PSWindowsUpdate](https://www.powershellgallery.com/packages/PSWindowsUpdate) module to apply Windows updates silently, ignoring reboots. It also applies updates to installed Microsoft products.
 
-{% embed url="https://www.powershellgallery.com/packages/PSWindowsUpdate" %}
+{% embed url="https://www.powershellgallery.com/packages/PSWindowsUpdate/2.2.1.5" %}
 
 **Prerequisites:** This script has no prerequisites.&#x20;
 
