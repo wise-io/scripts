@@ -11,9 +11,9 @@
 $Domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
 if ('WORKGROUP' -eq $Domain -or '' -eq $Domain) { $Domain = 'local' }
 $SiteDomain = "warp.$Domain"
-$SiteDir = "$env:SystemDrive\Cloudflare\ZTNA-Beacon"
+$SiteDir = "$env:SystemDrive\Cloudflare\Warp-Beacon"
 $SiteIndex = Join-Path -Path $SiteDir -ChildPath 'index.html'
-$SiteName = 'Cloudflare - ZTNA Beacon'
+$SiteName = 'Cloudflare - Warp Beacon'
 $Port = '9277'
 $Years = 10
 
@@ -34,18 +34,17 @@ if ($ActivePorts -contains $Port) {
 if (!(Test-Path $SiteIndex)) { New-Item -Path $SiteIndex -Force }
 
 # Check for / generate certificate
-New-SelfSignedCertificate -DnsName $SiteDomain -FriendlyName $SiteName `
-    -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm 'SHA256' `
-    -CertStoreLocation 'cert:\LocalMachine\My' `
-    -NotAfter (Get-Date).AddYears($Years)
-$Thumbprint = (Get-ChildItem 'cert:\LocalMachine\My' | Where-Object { $_.Subject -like "CN=$SiteDomain" }).Thumbprint
+$Thumbprint = (New-SelfSignedCertificate -DnsName $SiteDomain -FriendlyName $SiteName `
+        -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm 'SHA256' `
+        -CertStoreLocation 'cert:\LocalMachine\My' `
+        -NotAfter (Get-Date).AddYears($Years)).Thumbprint
 
 # Deploy IIS site
-New-IISSite -Name $SiteName -PhysicalPath $SiteDir -BindingInformation "*`:$Port`:$SiteDomain" -Protocol https -CertificateThumbprint $Thumbprint -SslFlag 0
+New-IISSite -Name $SiteName -PhysicalPath $SiteDir -BindingInformation "*`:$Port`:$SiteDomain" -Protocol https -CertificateThumbprint $Thumbprint
 
 # Create Firewall Rule
 New-NetFirewallRule -DisplayName 'WARP Beacon (TCP-In)' -Group 'Cloudflare WARP' -Direction 'Inbound' -Protocol 'TCP' -LocalPort $Port -Action 'Allow' -Profile 'Domain,Private' | Out-Null
 
 # Output thumbprint
-Write-Host "Host: $SiteDomain`:$Port"
-Write-Host "SHA-256 Hash: $Thumbprint"
+Write-Host "Host      : $SiteDomain`:$Port"
+Write-Host "Cert Hash : $Thumbprint"
