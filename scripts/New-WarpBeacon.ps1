@@ -9,7 +9,7 @@
 
 # Define variables
 $Domain = (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
-if (!($Domain)) { $Domain = 'local' }
+if ('WORKGROUP' -eq $Domain -or '' -eq $Domain) { $Domain = 'local' }
 $SiteDomain = "warp.$Domain"
 $SiteDir = "$env:SystemDrive\Cloudflare\ZTNA-Beacon"
 $SiteIndex = Join-Path -Path $SiteDir -ChildPath 'index.html'
@@ -33,7 +33,7 @@ if ($ActivePorts -contains $Port) {
 # Create directory for IIS site
 if (!(Test-Path $SiteIndex)) { New-Item -Path $SiteIndex -Force }
 
-# Generate certificate
+# Check for / generate certificate
 New-SelfSignedCertificate -DnsName $SiteDomain -FriendlyName $SiteName `
     -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm 'SHA256' `
     -CertStoreLocation 'cert:\LocalMachine\My' `
@@ -41,7 +41,7 @@ New-SelfSignedCertificate -DnsName $SiteDomain -FriendlyName $SiteName `
 $Thumbprint = (Get-ChildItem 'cert:\LocalMachine\My' | Where-Object { $_.Subject -like "CN=$SiteDomain" }).Thumbprint
 
 # Deploy IIS site
-New-IISSite -Name $SiteName -PhysicalPath $SiteDir -BindingInformation "*`:$Port`:" -Protocol https -CertificateThumbprint $Thumbprint -SslFlag 0
+New-IISSite -Name $SiteName -PhysicalPath $SiteDir -BindingInformation "*`:$Port`:$SiteDomain" -Protocol https -CertificateThumbprint $Thumbprint -SslFlag 0
 
 # Create Firewall Rule
 New-NetFirewallRule -DisplayName 'WARP Beacon (TCP-In)' -Group 'Cloudflare WARP' -Direction 'Inbound' -Protocol 'TCP' -LocalPort $Port -Action 'Allow' -Profile 'Domain,Private' | Out-Null
