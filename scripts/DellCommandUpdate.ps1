@@ -35,7 +35,11 @@ function Invoke-PreinstallChecks {
 
 function Get-DownloadURL {
   $DellURL = 'https://www.dell.com/support/kbdoc/en-us/000177325/dell-command-update'
-  $Headers = @{ 'accept' = 'text/html' }
+  $Headers = @{
+    'accept'          = 'text/html'
+    'accept-encoding' = 'gzip'
+    'accept-language' = '*'
+  }
   [String]$DellWebPage = Invoke-RestMethod -UseBasicParsing -Uri $DellURL -Headers $Headers
   if ($DellWebPage -match '(https://www\.dell\.com.*driverId=[a-zA-Z0-9]*)') { 
     $DownloadPage = Invoke-RestMethod -UseBasicParsing -Uri $Matches[1] -Headers $Headers
