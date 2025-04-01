@@ -16,7 +16,6 @@ param(
     [String]$OnboardingScript
 )
 
-
 function Get-InstallStatus {
     param(
         [Parameter(Mandatory)]
