@@ -1,19 +1,18 @@
 <#
     .SYNOPSIS
-        Runs a scheduled task to deploy MDE via the provided onboarding package script
+        Runs a scheduled task to deploy MDE via the provided onboarding package
     .DESCRIPTION
         This script is for onboarding machines to the Microsoft Defender for Endpoint services, including security and compliance products.
         Once completed, the machine should light up in the portal within 5-30 minutes, depending on this machine's Internet connectivity availability and machine power state (plugged in vs. battery powered).
-    .PARAMETER OnboardingScript
+    .PARAMETER OnboardingPackage
         Retrieved from https://security.microsoft.com > Settings > Endpoints > Onboarding > [Set OS] > Download Onboarding Package
-        Script will need to be extracted and placed at the path provided
     .NOTES
         Author: Aaron J Stevenson
 #>
 
 param(
     [Parameter(Position = 0, Mandatory = $True)]
-    [String]$OnboardingScript
+    [String]$OnboardingPackage
 )
 
 function Get-InstallStatus {
@@ -71,14 +70,25 @@ function Install-Prerequisites {
     }
 }
 
-# Define scheduled task configuration
-$Task = [PSCustomObject]@{
-    Name        = 'Deploy - Microsoft Defender for Endpoint'
-    Description = 'Installs MDE by running the onboarding package script as a scheduled task.'
-    Principal   = New-ScheduledTaskPrincipal -UserId 'S-1-5-18' -RunLevel Highest -LogonType ServiceAccount
-    Action      = New-ScheduledTaskAction -Execute $OnboardingScript
-    Settings    = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+function Set-OnboardingScript {
+    # Test onboarding package path
+    $PathExists = Test-Path $OnboardingPackage -PathType Leaf -Filter '*.zip'
+    if (!$PathExists) { 
+        Write-Warning "Invalid path provided to onboarding package: $OnboardingPackage"
+        exit 1
+    }
+
+    # Copy and extract onboarding package
+    $LocalPackage = Join-Path -Path $env:TEMP -ChildPath 'OnboardingPackage.zip'
+    $OnboardingPackageFolder = Join-Path -Path $env:TEMP -ChildPath 'OnboardingPackage'
+    Copy-Item -Path $OnboardingPackage -Destination $LocalPackage
+    Expand-Archive -Path $LocalPackage -DestinationPath $OnboardingPackageFolder -Force
+
+    # Return onboarding script path
+    return ($OnboardingPackageFolder | Get-ChildItem -Filter '*.cmd').FullName
 }
+
+$SchTaskName = 'Deploy - Microsoft Defender for Endpoint'
 
 # Test if deployment is needed
 $Service = Get-Service -Name 'Sense' | Where-Object { $_.DisplayName -eq 'Windows Defender Advanced Threat Protection Service' }
@@ -88,7 +98,7 @@ if ($Service) {
 }
 else {
     # Check for existing scheduled task
-    $TaskExists = Get-ScheduledTask -TaskName $Task.Name -ErrorAction Ignore
+    $TaskExists = Get-ScheduledTask -TaskName $SchTaskName -ErrorAction Ignore
     if ($TaskExists -and $TaskExists.State -eq 'Running') { Write-Host 'Deployment task exists and is currently running.' }
     elseif ($TaskExists) { 
         Write-Host 'Deployment task exists but is not currently running'
@@ -104,6 +114,18 @@ else {
 if ($DeploymentNeeded) {
     # Get prerequisites
     Install-Prerequisites
+
+    # Set onboarding script
+    $OnboardingScript = Set-OnboardingScript
+
+    # Define scheduled task configuration
+    $Task = [PSCustomObject]@{
+        Name        = $SchTaskName
+        Description = 'Installs MDE by running the onboarding package script as a scheduled task.'
+        Principal   = New-ScheduledTaskPrincipal -UserId 'S-1-5-18' -RunLevel Highest -LogonType ServiceAccount
+        Action      = New-ScheduledTaskAction -Execute $OnboardingScript
+        Settings    = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+    }
 
     # Create scheduled task object
     $SchTask = New-ScheduledTask -Action $Task.Action -Description $Task.Description -Principal $Task.Principal -Settings $Task.Settings
@@ -129,8 +151,4 @@ if ($DeploymentNeeded) {
     $TaskResult = (Get-ScheduledTaskInfo -TaskName $Task.Name).LastTaskResult
     if ($TaskResult -eq '0') { Write-Host 'Deployment task completed successfully.' }
     else { Write-Host 'Task result indicates an error with deployment.' }
-
-    # Cleanup
-    Start-Sleep -Seconds 5
-    Get-ScheduledTask -TaskName $Task.Name | Unregister-ScheduledTask
 }
