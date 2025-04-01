@@ -16,6 +16,62 @@ param(
     [String]$OnboardingScript
 )
 
+
+function Get-InstallStatus {
+    param(
+        [Parameter(Mandatory)]
+        [String]$DisplayName
+    )
+
+    $RegPaths = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+    )
+
+    Start-Sleep -Seconds 5
+    
+    $Installed = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" }
+    if ($Installed) { return $true }
+    else { return $false }
+}
+
+function Install-Prerequisites {
+    # Set download URL for installation package (needed for WS12R2 / WS2016)
+    $InstallPackageURL = 'https://definitionupdates.microsoft.com/packages/content/md4ws.msi?packageType=ProductInstallerMsi&packageVersion=4.18.25020.1009&arch=x64'
+
+    # Get OS Information
+    $OSInfo = Get-CimInstance -ClassName Win32_OperatingSystem
+    Write-Host "OS Name: $($OSInfo.Caption)"
+    Write-Host "Version: $($OSInfo.Version)"
+    Write-Host "Build:   $($OSInfo.BuildNumber)"
+
+    # Set variables
+    if (($OSInfo.BuildNumber -eq 9600) -or ($OSInfo.BuildNumber -eq 14393)) { $PackageNeeded = $true }
+    $Installed = Get-InstallStatus -DisplayName 'Microsoft Defender for Endpoint'
+
+    # Install prerequisite package
+    if ($PackageNeeded -and !($Installed)) {
+        Write-Host 'Prerequisite package not detected.'
+        Write-Host 'Downloading package from:'
+        Write-Host $InstallPackageURL
+
+        $Installer = Join-Path -Path $env:TEMP -ChildPath 'md4ws.msi'
+        Invoke-WebRequest -Uri $InstallPackageURL -OutFile $Installer
+
+        Write-Host 'Installing package...'
+        Start-Process -Wait -FilePath msiexec.exe -ArgumentList "/i $Installer /quiet"
+    }
+
+    # Confirm installation
+    $Installed = Get-InstallStatus -DisplayName 'Microsoft Defender for Endpoint'
+    if ($Installed) { Write-Host 'Prerequisite package installed.' }
+    else {
+        Write-Warning 'Prerequisite package not detected after execution.'
+        Write-Host 'Install pending Windows Updates for Defender and try again.'
+        exit 1
+    }
+}
+
 # Define scheduled task configuration
 $Task = [PSCustomObject]@{
     Name        = 'Deploy - Microsoft Defender for Endpoint'
@@ -47,6 +103,9 @@ else {
 
 # Deploy and run scheduled task
 if ($DeploymentNeeded) {
+    # Get prerequisites
+    Install-Prerequisites
+
     # Create scheduled task object
     $SchTask = New-ScheduledTask -Action $Task.Action -Description $Task.Description -Principal $Task.Principal -Settings $Task.Settings
 
