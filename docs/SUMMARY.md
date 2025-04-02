@@ -8,6 +8,7 @@
   * [Bluebeam Revu](software/installers/bluebeam-revu.md)
   * [Browser Extension](software/installers/browser-extension.md)
   * [Google Chrome](software/installers/google-chrome.md)
+  * [Microsoft Defender for Endpoint](software/installers/microsoft-defender-for-endpoint.md)
   * [Microsoft Office](software/installers/microsoft-office.md)
   * [QuickBooks Desktop](software/installers/quickbooks-desktop.md)
 * [Uninstallers](software/uninstallers/README.md)
