@@ -49,6 +49,11 @@ function Install-Prerequisites {
 
     # Install prerequisite package
     if ($PackageNeeded -and !($Installed)) {
+        $ProgressPreference = 'SilentlyContinue'
+        if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls13') {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        }
+        
         Write-Host 'Prerequisite package not detected.'
         Write-Host 'Downloading package from:'
         Write-Host $InstallPackageURL
@@ -91,7 +96,7 @@ function Set-OnboardingScript {
 $SchTaskName = 'Deploy - Microsoft Defender for Endpoint'
 
 # Test if deployment is needed
-$Service = Get-Service -Name 'Sense' | Where-Object { $_.DisplayName -eq 'Windows Defender Advanced Threat Protection Service' }
+$Service = Get-Service -Name 'Sense' -ErrorAction Ignore | Where-Object { $_.DisplayName -eq 'Windows Defender Advanced Threat Protection Service' }
 if ($Service) { 
     Write-Host 'Windows Defender ATP Service detected'
     Write-Host "Service Status: $($Service.Status)"
@@ -101,7 +106,7 @@ else {
     $TaskExists = Get-ScheduledTask -TaskName $SchTaskName -ErrorAction Ignore
     if ($TaskExists -and $TaskExists.State -eq 'Running') { Write-Host 'Deployment task exists and is currently running.' }
     elseif ($TaskExists) { 
-        Write-Host 'Deployment task exists but is not currently running'
+        # Write-Host 'Deployment task exists but is not currently running'
         $DeploymentNeeded = $True 
     }
     else {
