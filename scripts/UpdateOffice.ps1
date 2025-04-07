@@ -8,7 +8,7 @@
 #>
 
 # Get path to ClickToRun executable
-$Path = Resolve-Path "$env:SystemDrive\*\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe"
+$Path = Resolve-Path "$env:SystemDrive\*\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe" -ErrorAction Ignore
 
 if ($Path) {
   Write-Host "`nStarting Microsoft Office update process..."
