@@ -7,18 +7,13 @@
     Author: Aaron J. Stevenson
 #>
 
-function Get-C2RPath {
-  $C2Rx86 = "${env:ProgramFiles(x86)}\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe"
-  $C2Rx64 = "$env:ProgramFiles\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe"
-  
-  if (Test-Path $C2Rx86) { return $C2Rx86 }
-  elseif (Test-Path $C2Rx64) { return $C2Rx64 }
-  else {
-    Write-Output "`nNo ClickToRun installations of Microsoft Office detected."
-    exit 0
-  }
-}
+# Get path to ClickToRun executable
+$Path = Resolve-Path "$env:SystemDrive\*\Common Files\Microsoft Shared\ClickToRun\OfficeC2RClient.exe"
 
-$Path = Get-C2RPath
-Write-Output "`nStarting Microsoft Office update process..."
-Start-Process -FilePath $Path -ArgumentList '/update user displaylevel=false' -Wait
+if ($Path) {
+  Write-Host "`nStarting Microsoft Office update process..."
+  Start-Process -FilePath $Path -ArgumentList '/update user displaylevel=false' -Wait
+}
+else {
+  Write-Host "`nNo ClickToRun installations of Microsoft Office detected."
+}
