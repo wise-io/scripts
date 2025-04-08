@@ -12,14 +12,15 @@ description: PowerShell script to silently install and run Dell Command Update (
 
 This script downloads and installs the latest version of Dell Command Update (DCU) if not already installed. It will then use `dcu-cli.exe` to download and install all Dell driver/firmware updates, ignoring reboots.
 
-{% embed url="https://www.dell.com/support/manuals/en-us/command-update/dellcommandupdate_rg" %}
+{% embed url="https://www.dell.com/support/product-details/en-us/product/command-update/resources/manuals" %}
 
 **Prerequisites:** This script has no prerequisites.&#x20;
 
 **Notes:**
 
 * Script will abort if a PC manufacturer other than Dell is detected.
-* Incompatible products, such as Dell Update, will be removed if detected.
+* Dell Update, which is incompatible with Dell Command Update, will be removed if detected.
+* .NET Desktop Runtime, a prerequisite to Dell Command Update 5.5+, will be updated / installed to the latest LTS release if not already installed.&#x20;
 * Dell Command Update is not intended for use with server hardware. Use Dell System Update instead.
 
 ***
@@ -27,7 +28,7 @@ This script downloads and installs the latest version of Dell Command Update (DC
 ## Script
 
 {% hint style="info" %}
-Script will abort if a PC manufacturer other than Dell is detected.
+Script will abort if a system manufacturer other than Dell is detected.
 {% endhint %}
 
 {% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/DellCommandUpdate.ps1" %}
@@ -35,7 +36,7 @@ Script will abort if a PC manufacturer other than Dell is detected.
 ## Examples
 
 ```powershell
-.\UpdateDell.ps1
+.\DellCommandUpdate.ps1
 ```
 
 This example downloads and installs Dell Command Update if it isn't already installed. After installation, Dell Command Update will check for and install any Dell updates.
