@@ -33,29 +33,46 @@ function Get-Architecture {
   }
 }
 
-function Get-InstalledApp {
-  param([Parameter(Mandatory)][String]$DisplayName)
+function Get-InstalledApps {
+  param(
+    [Parameter(Mandatory)][String[]]$DisplayNames,
+    [String[]]$Exclude
+  )
+  
   $RegPaths = @(
     'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
     'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
   )
   
-  # Check for bundled version property
-  $App = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" -and $null -ne $_.BundleVersion }
-  if ($App) { return $App }
-  else {
-    return Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" }
+  # Get applications matching criteria
+  $BroadMatch = @()
+  foreach ($DisplayName in $DisplayNames) {
+    $AppsWithBundledVersion = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" -and $null -ne $_.BundleVersion }
+    if ($AppsWithBundledVersion) { $BroadMatch += $AppsWithBundledVersion }
+    else { $BroadMatch += Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" } }
   }
+  
+  # Remove excluded apps
+  $MatchedApps = @()
+  foreach ($App in $BroadMatch) {
+    if ($Exclude -notcontains $App.DisplayName) { $MatchedApps += $App }
+  }
+
+  return $MatchedApps
 }
 
-function Remove-DellUpdate {
-  # Check for incompatible products (Dell Update)
-  $IncompatibleApps = Get-InstalledApp -DisplayName 'Dell Update'
+function Remove-IncompatibleApps {
+  # Check for incompatible products
+  $IncompatibleApps = Get-InstalledApps -DisplayNames 'Dell Update', 'Dell Command | Update' `
+    -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update', 'Dell Command | Update for Windows Universal'
   foreach ($App in $IncompatibleApps) {
-    if ($App.DisplayName -like '*SupportAssist*') { continue }
     Write-Output "Attempting to remove program: [$($App.DisplayName)]"
     try {
-      Start-Process -NoNewWindow -Wait -FilePath $App.UninstallString -ArgumentList '/quiet'
+      if ($App.UninstallString -match 'msiexec') {
+        $Guid = [regex]::Match($App.UninstallString, '\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}').Value
+        Start-Process -NoNewWindow -Wait -FilePath 'msiexec.exe' -ArgumentList "/x $Guid /quiet /qn"
+      }
+      else { Start-Process -NoNewWindow -Wait -FilePath $App.UninstallString -ArgumentList '/quiet' }
       Write-Output "Successfully removed $($App.DisplayName)"
     }
     catch { 
@@ -111,7 +128,7 @@ function Install-DellCommandUpdate {
   
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApp -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
   Write-Output "`nInstalled Dell Command Update: $CurrentVersion"
   Write-Output "Latest Dell Command Update: $($LatestDellCommandUpdate.Version)"
 
@@ -127,7 +144,7 @@ function Install-DellCommandUpdate {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApp -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
       Write-Output "Successfully installed Dell Command Update [$CurrentVersion]`n"
     }
@@ -136,9 +153,7 @@ function Install-DellCommandUpdate {
       exit 1
     }
   }
-  else { 
-    Write-Output "`nDell Command Update installation / upgrade not needed`n"
-  }
+  else { Write-Output "`nDell Command Update installation / upgrade not needed`n" }
 }
 
 function Install-DotNetDesktopRuntime {
@@ -156,7 +171,7 @@ function Install-DotNetDesktopRuntime {
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApp -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
   Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
   Write-Output "Latest .NET Desktop Runtime: $($LatestDotNet.Version)"
   
@@ -172,7 +187,7 @@ function Install-DotNetDesktopRuntime {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApp -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
     if ($CurrentVersion -match $LatestDotNet.Version) {
       Write-Output "Successfully installed .NET Desktop Runtime [$CurrentVersion]"
     }
@@ -181,9 +196,7 @@ function Install-DotNetDesktopRuntime {
       exit 1
     }
   }
-  else { 
-    Write-Output "`n.NET Desktop Runtime installation / upgrade not needed"
-  }
+  else { Write-Output "`n.NET Desktop Runtime installation / upgrade not needed" }
 }
 
 function Invoke-DellCommandUpdate {
@@ -224,7 +237,7 @@ if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
 }
 
 # Handle Prerequisites / Dependencies
-Remove-DellUpdate
+Remove-IncompatibleApps
 Install-DotNetDesktopRuntime
 
 # Install DCU and available updates
