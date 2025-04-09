@@ -31,20 +31,6 @@ function Get-Architecture {
   }
 }
 
-function Get-LatestDotNetDesktopRuntime {
-  $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
-  $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
-  $Arch = Get-Architecture
-  $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
-
-  $Latest = @{
-    URL     = $URL
-    Version = $Version
-  }
-
-  return $Latest
-}
-
 function Get-InstalledApp {
   param([Parameter(Mandatory)][String]$DisplayName)
 
@@ -57,6 +43,20 @@ function Get-InstalledApp {
 }
 
 function Install-DotNetDesktopRuntime {
+  function Get-LatestDotNetDesktopRuntime {
+    $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
+    $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
+    $Arch = Get-Architecture
+    $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
+  
+    $Latest = @{
+      URL     = $URL
+      Version = $Version
+    }
+  
+    return $Latest
+  }
+  
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
   $CurrentVersion = (Get-InstalledApp -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
