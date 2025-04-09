@@ -50,8 +50,7 @@ function Get-InstalledApp {
 
 function Remove-DellUpdate {
   # Check for incompatible products (Dell Update)
-  $RegPaths = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
-  $IncompatibleApps = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like 'Dell Update*' } | Select-Object
+  $IncompatibleApps = Get-InstalledApp -DisplayName 'Dell Update'
   foreach ($IncompatibleApp in $IncompatibleApps) {
     Write-Output "Attempting to remove program: [$($IncompatibleApp.DisplayName)]"
     try {
@@ -142,7 +141,6 @@ function Install-DellCommandUpdate {
 }
 
 function Install-DotNetDesktopRuntime {
-  
   function Get-LatestDotNetDesktopRuntime {
     $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
     $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
