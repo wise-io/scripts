@@ -147,12 +147,10 @@ function Install-DotNetDesktopRuntime {
     $Arch = Get-Architecture
     $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
   
-    $Latest = @{
+    return @{
       URL     = $URL
       Version = $Version
     }
-  
-    return $Latest
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
@@ -190,7 +188,7 @@ function Install-DotNetDesktopRuntime {
 function Invoke-DellCommandUpdate {
   # Check for DCU CLI
   $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
-  if (!$DCU) {
+  if ($null -eq $DCU) {
     Write-Warning 'Dell Command Update CLI was not detected.'
     exit 1
   }
@@ -219,7 +217,7 @@ if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.S
 }
 
 # Check device manufacturer
-if ((Get-WmiObject win32_bios).Manufacturer -notlike '*Dell*') {
+if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
   Write-Output "`nNot a Dell system. Aborting..."
   exit 0
 }
