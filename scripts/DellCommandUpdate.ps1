@@ -51,14 +51,15 @@ function Get-InstalledApp {
 function Remove-DellUpdate {
   # Check for incompatible products (Dell Update)
   $IncompatibleApps = Get-InstalledApp -DisplayName 'Dell Update'
-  foreach ($IncompatibleApp in $IncompatibleApps) {
-    Write-Output "Attempting to remove program: [$($IncompatibleApp.DisplayName)]"
+  foreach ($App in $IncompatibleApps) {
+    if ($App.DisplayName -like '*SupportAssist*') { continue }
+    Write-Output "Attempting to remove program: [$($App.DisplayName)]"
     try {
-      Start-Process -NoNewWindow -Wait -FilePath $IncompatibleApp.UninstallString -ArgumentList '/quiet'
-      Write-Output "Successfully removed $($IncompatibleApp.DisplayName)"
+      Start-Process -NoNewWindow -Wait -FilePath $App.UninstallString -ArgumentList '/quiet'
+      Write-Output "Successfully removed $($App.DisplayName)"
     }
     catch { 
-      Write-Warning "Failed to remove $($IncompatibleApp.DisplayName)"
+      Write-Warning "Failed to remove $($App.DisplayName)"
       Write-Warning $_
       exit 1
     }
