@@ -129,7 +129,7 @@ function Install-DellCommandUpdate {
     # Confirm installation
     $CurrentVersion = (Get-InstalledApp -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
-      Write-Output "Successfully installed Dell Command Update [$CurrentVersion]"
+      Write-Output "Successfully installed Dell Command Update [$CurrentVersion]`n"
     }
     else {
       Write-Warning "Dell Command Update [$($LatestDellCommandUpdate.Version)] not detected after installation attempt"
@@ -137,7 +137,7 @@ function Install-DellCommandUpdate {
     }
   }
   else { 
-    Write-Output "`nDell Command Update installation / upgrade not needed"
+    Write-Output "`nDell Command Update installation / upgrade not needed`n"
   }
 }
 
