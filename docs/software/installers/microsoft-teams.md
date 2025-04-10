@@ -18,6 +18,10 @@ This script downloads and installs the latest Microsoft Teams (New) machine wide
 
 ## Script
 
+{% hint style="warning" %}
+**Note:** This script will attempt to remove Teams (Classic) versions if they were deployed with the machine-wide installer package.
+{% endhint %}
+
 {% @github-files/github-code-block url="https://github.com/wise-io/scripts/blob/main/scripts/InstallTeams.ps1" %}
 
 ***
