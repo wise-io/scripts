@@ -13,8 +13,8 @@ This script uses the Office Deployment Tool (ODT) to perform a clean install of 
 **Prerequisites:**
 
 1. If necessary, create a configuration xml at [https://config.office.com](https://config.office.com).
-2. Store the configuration xml in a location that will be accessible to the script at runtime.
-3. Notate the path of the configuration xml.
+2. Store the configuration xml in a location that will be accessible to the script at runtime (either file path or url).
+3. Notate the path / url of the configuration xml. If using GitHub to host the file, be sure to get the raw URL.
 
 **Notes:**
 
@@ -55,7 +55,15 @@ This example installs the 32-bit version of Microsoft Office 365 Apps for Busine
 .\InstallOffice.ps1 -Config "C:\temp\office-config.xml"
 ```
 
-This example utilizes the provided XML configuration file to determine which Microsoft Office products to install or remove.
+This example utilizes the provided XML configuration file to install Microsoft Office.
+
+### Example 4
+
+```powershell
+.\InstallOffice.ps1 -Config "https://raw.githubusercontent.com/wise-io/scripts/office-xmls/config.xml"
+```
+
+This example downloads the XML configuration file from the provided URL and installs Microsoft Office.
 
 ***
 
@@ -63,7 +71,7 @@ This example utilizes the provided XML configuration file to determine which Mic
 
 `-Config`
 
-Optional string parameter that allows you to provide a file path to an office configuration xml. This XML will be used to determine what Microsoft Office products to install or remove.
+Optional string parameter that allows you to provide a file path or URL to an office configuration xml. This XML will be used to determine what Microsoft Office products to install or remove.
 
 
 
