@@ -172,7 +172,8 @@ function Install-DotNetDesktopRuntime {
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion[0]
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+  if ($CurrentVersion) { $CurrentVersion = $CurrentVersion[0] }
   Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
   Write-Output "Latest .NET Desktop Runtime: $($LatestDotNet.Version)"
 
