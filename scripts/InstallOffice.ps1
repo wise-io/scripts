@@ -6,7 +6,7 @@
     WARNING: This script will remove all existing office installations if used with the default configuration xml.
   .PARAMETER Config
     Parameter Set: Custom
-    File path to custom configuration xml for office installations.
+    URL or file path to custom configuration xml for office installations.
   .PARAMETER x86
     Parameter Set: Builtin
     Switch parameter to install 32-bit Office applications with the built-in XML.
@@ -24,6 +24,18 @@ param (
   [Parameter(ParameterSetName = 'Builtin')]
   [Alias('32', '32bit')][Switch]$x86
 )
+
+function Test-ValidUrl {
+  param([String]$Url)
+
+  try {
+    $Uri = [System.Uri]::New($Url)
+    return $Uri.Scheme -in @('http', 'https')
+  }
+  catch {
+    return $false
+  }
+}
 
 function Get-ODT {
   [String]$MSWebPage = Invoke-RestMethod 'https://www.microsoft.com/en-us/download/details.aspx?id=49117'
@@ -45,24 +57,46 @@ function Get-ODT {
 }
 
 function Set-ConfigXML {
-  if ($Config) {
-    if (Test-Path $Config) { 
-      $Script:ConfigFile = $Config 
-      Write-Output 'Provided configuration file will be used for installation.'
-    }
-    else {
-      Write-Warning 'The configuration XML file path is not valid or is inaccessible.'
-      Write-Warning 'Please check the path and try again.'
+  # Create path to config file
+  $Path = Split-Path -Path $Script:ConfigFile -Parent
+  if (!(Test-Path -Path $Path -PathType Container)) {
+    New-Item -Path $Path -ItemType Directory | Out-Null
+  }
+
+  # Determine type of config provided
+  switch ($Config) {
+    { ($_) -and (Test-Path -Path $_ -PathType Leaf -Include '*.xml') } { $ConfigPath = $true }
+    { ($_) -and (Test-ValidUrl -Url $_) } { $ConfigUrl = $true }
+    default { $DefaultConfig = $true }
+  }
+
+  # If path provided, copy file to temp directory
+  if ($ConfigPath) {
+    Write-Output 'Configuration file path provided - copying file to temp directory for installation...'
+    try { Copy-Item -Path $Config -Destination $Script:ConfigFile }
+    catch {
+      Write-Warning 'Unable to copy configuration file'
+      Write-Warning $_
       exit 1
     }
   }
-  else {
-    $Path = Split-Path -Path $Script:ConfigFile -Parent
-    if (!(Test-Path -PathType Container $Path)) {
-      New-Item -ItemType Directory -Path $Path | Out-Null
+
+  # If url provided, download file to temp directory
+  if ($ConfigUrl) {
+    Write-Output 'Configuration url provided - downloading file to temp directory for installation...'
+    try { Invoke-WebRequest -Uri $Config -OutFile $Script:ConfigFile }
+    catch {
+      Write-Warning 'Unable to download configuration file'
+      Write-Warning $_
+      exit 1
     }
-    
-    $XML = [XML]@'
+  }
+
+  # If no configuration provided, create default configuration file in temp directory
+  if ($DefaultConfig) {
+    Write-Output 'No configuration file provided - creating default configuration file for installation...'
+    try {
+      $XML = [XML]@'
   <Configuration ID="5cf809c5-8f36-4fea-a837-69c7185cca8a">
     <Remove All="TRUE"/>
     <Add OfficeClientEdition="64" Channel="Current" MigrateArch="TRUE">
@@ -87,12 +121,18 @@ function Set-ConfigXML {
   </Configuration>
 '@
 
-    if ($x86 -or !([Environment]::Is64BitOperatingSystem)) {
-      $OfficeClientEdition = $XML.SelectSingleNode('//Add[@OfficeClientEdition]')
-      $OfficeClientEdition.SetAttribute('OfficeClientEdition', '32')
-    }
+      if ($x86 -or !([Environment]::Is64BitOperatingSystem)) {
+        $OfficeClientEdition = $XML.SelectSingleNode('//Add[@OfficeClientEdition]')
+        $OfficeClientEdition.SetAttribute('OfficeClientEdition', '32')
+      }
     
-    $XML.Save("$Script:ConfigFile")
+      $XML.Save("$Script:ConfigFile")
+    }
+    catch { 
+      Write-Warning 'Unable to create default configuration file'
+      Write-Warning $_
+      exit 1
+    }
   }
 }
 
