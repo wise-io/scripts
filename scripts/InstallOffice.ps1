@@ -112,9 +112,13 @@ function Install-Office {
 function Remove-OfficeHub {
   $AppName = 'Microsoft.MicrosoftOfficeHub'
   try {
-    Write-Output "`nRemoving [$AppName] (Microsoft Store App)..."
-    Get-AppxProvisionedPackage -Online | Where-Object { ($AppName -contains $_.DisplayName) } | Remove-AppxProvisionedPackage -AllUsers | Out-Null
-    Get-AppxPackage -AllUsers | Where-Object { ($AppName -contains $_.Name) } | Remove-AppxPackage -AllUsers
+    $Package = Get-AppxPackage -AllUsers | Where-Object { ($AppName -contains $_.Name) }
+    $ProvisionedPackage = Get-AppxProvisionedPackage -Online | Where-Object { ($AppName -contains $_.DisplayName) }
+    if ($Package -or $ProvisionedPackage) {
+      Write-Output "`nRemoving [$AppName] (Microsoft Store App)..."
+      $ProvisionedPackage | Remove-AppxProvisionedPackage -AllUsers | Out-Null
+      $Package | Remove-AppxPackage -AllUsers
+    }
   }
   catch { 
     Write-Warning "Error during [$AppName] removal:"
