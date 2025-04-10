@@ -5,6 +5,7 @@
     Installs the latest version of Dell Command Update and applies all Dell updates silently.
   .LINK
     https://www.dell.com/support/product-details/en-us/product/command-update/resources/manuals
+    https://github.com/wise-io/scripts/blob/main/scripts/DellCommandUpdate.ps1
   .NOTES
     Author: Aaron J. Stevenson
 #>
@@ -58,7 +59,7 @@ function Get-InstalledApps {
     if ($Exclude -notcontains $App.DisplayName) { $MatchedApps += $App }
   }
 
-  return $MatchedApps
+  return $MatchedApps | Sort-Object { [version]$_.BundleVersion } -Descending
 }
 
 function Remove-IncompatibleApps {
@@ -107,7 +108,7 @@ function Install-DellCommandUpdate {
   
     # Attempt to parse Dell website for download URLs for latest DCU
     $DownloadURLs = foreach ($Link in $KBLinks) {
-      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers
+      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
       if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { $Matches[1] }
     }
   
@@ -171,10 +172,10 @@ function Install-DotNetDesktopRuntime {
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion[0]
   Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
   Write-Output "Latest .NET Desktop Runtime: $($LatestDotNet.Version)"
-  
+
   if ($CurrentVersion -lt $LatestDotNet.Version) {
     
     # Download installer
@@ -187,7 +188,7 @@ function Install-DotNetDesktopRuntime {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion[0]
     if ($CurrentVersion -match $LatestDotNet.Version) {
       Write-Output "Successfully installed .NET Desktop Runtime [$CurrentVersion]"
     }
