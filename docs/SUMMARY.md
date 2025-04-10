@@ -10,6 +10,7 @@
   * [Google Chrome](software/installers/google-chrome.md)
   * [Microsoft Defender for Endpoint](software/installers/microsoft-defender-for-endpoint.md)
   * [Microsoft Office](software/installers/microsoft-office.md)
+  * [Microsoft Teams](software/installers/microsoft-teams.md)
   * [QuickBooks Desktop](software/installers/quickbooks-desktop.md)
 * [Uninstallers](software/uninstallers/README.md)
   * [Browser Extension](software/uninstallers/browser-extension.md)
