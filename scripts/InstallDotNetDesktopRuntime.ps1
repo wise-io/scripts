@@ -39,7 +39,8 @@ function Get-InstalledApp {
     'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
   )
   
-  return Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" -and $null -ne $_.BundleVersion }
+  $App = Get-ChildItem -Path $RegPaths | Get-ItemProperty | Where-Object { $_.DisplayName -like "*$DisplayName*" -and $null -ne $_.BundleVersion }
+  return $App | Sort-Object { [version]$_.BundleVersion } -Descending
 }
 
 function Install-DotNetDesktopRuntime {
@@ -49,20 +50,19 @@ function Install-DotNetDesktopRuntime {
     $Arch = Get-Architecture
     $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
   
-    $Latest = @{
+    return @{
       URL     = $URL
       Version = $Version
     }
-  
-    return $Latest
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApp -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+  if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
   Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
   Write-Output "Latest .NET Desktop Runtime: $($LatestDotNet.Version)"
-  
+
   if ($CurrentVersion -lt $LatestDotNet.Version) {
     
     # Download installer
@@ -75,7 +75,8 @@ function Install-DotNetDesktopRuntime {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApp -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+    if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
       Write-Output "Successfully installed .NET Desktop Runtime [$CurrentVersion]"
     }
@@ -84,9 +85,7 @@ function Install-DotNetDesktopRuntime {
       exit 1
     }
   }
-  else { 
-    Write-Output "`n.NET Desktop Runtime installation / upgrade not needed"
-  }
+  else { Write-Output "`n.NET Desktop Runtime installation / upgrade not needed" }
 }
 
 # Adjust PowerShell settings
