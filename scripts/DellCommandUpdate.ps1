@@ -148,9 +148,11 @@ function Install-DellCommandUpdate {
     $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
       Write-Output "Successfully installed Dell Command Update [$CurrentVersion]`n"
+      Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
       Write-Warning "Dell Command Update [$($LatestDellCommandUpdate.Version)] not detected after installation attempt"
+      Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
   }
@@ -193,9 +195,11 @@ function Install-DotNetDesktopRuntime {
     if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
       Write-Output "Successfully installed .NET Desktop Runtime [$CurrentVersion]"
+      Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
       Write-Warning ".NET Desktop Runtime [$($LatestDotNet.Version)] not detected after installation attempt"
+      Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
   }
