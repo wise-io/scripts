@@ -93,8 +93,14 @@ function Install-DellCommandUpdate {
   
     # Set fallback URL based on architecture
     $Arch = Get-Architecture
-    if ($Arch -like 'arm*') { $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE' }
-    else { $FallbackDownloadURL = 'https://dl.dell.com/FOLDER12925773M/1/Dell-Command-Update-Windows-Universal-Application_P4DJW_WIN64_5.5.0_A00.EXE' }
+    if ($Arch -like 'arm*') { 
+      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
+      $FallbackMD5 = 'c6ed3bc35d7d6d726821a2c25fbbb44d'
+    }
+    else { 
+      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER12925773M/1/Dell-Command-Update-Windows-Universal-Application_P4DJW_WIN64_5.5.0_A00.EXE'
+      $FallbackMD5 = 'a1eb9c7eadb6d9cbfbbe2be13049b299'
+    }
   
     # Set headers for Dell website
     $Headers = @{
@@ -109,21 +115,35 @@ function Install-DellCommandUpdate {
     $KBLinks = foreach ($Match in $LinkMatches) { $Match.Groups[1].Value }
   
     # Attempt to parse Dell website for download URLs for latest DCU
-    $DownloadURLs = foreach ($Link in $KBLinks) {
+    $DownloadObjects = foreach ($Link in $KBLinks) {
       $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
-      if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { $Matches[1] }
+      if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
+        $Url = $Matches[1]
+        if ($DownloadPage -match 'MD5:.*?([a-fA-F0-9]{32})') { $MD5 = $Matches[1] }
+        [PSCustomObject]@{
+          URL = $Url
+          MD5 = $MD5
+        }
+      }
     }
   
-    # Set download URL based on architecture
-    if ($Arch -like 'arm*') { $DownloadURL = $DownloadURLs | Where-Object { $_ -like '*winarm*' } }else { $DownloadURL = $DownloadURLs | Where-Object { $_ -notlike '*winarm*' } }
-  
-    # Revert to fallback URL if unable to retrieve URL from Dell website
-    if ($null -eq $DownloadURL) { $DownloadURL = $FallbackDownloadURL }
-  
+    # Set download URL / MD5 based on architecture
+    if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
+    else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
+    $DownloadURL = $DownloadObject.URL
+    $MD5 = $DownloadObject.MD5
+
+    # Revert to fallback URL / MD5 if unable to retrieve from Dell
+    if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.MD5) { 
+      $DownloadURL = $FallbackDownloadURL
+      $MD5 = $FallbackMD5
+    }
+
     # Get version from DownloadURL
-    $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
+    $Version = $DownloadObject.URL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
   
     return @{
+      MD5     = $MD5.ToUpper()
       URL     = $DownloadURL
       Version = $Version
     }
@@ -141,6 +161,15 @@ function Install-DellCommandUpdate {
     Write-Output "`nDell Command Update installation needed"
     Write-Output 'Downloading...'
     Invoke-WebRequest -Uri $LatestDellCommandUpdate.URL -OutFile $Installer -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
+
+    # Verify MD5 checksum
+    Write-Output 'Verifying MD5 checksum...'
+    $InstallerMD5 = (Get-FileHash -Path $Installer -Algorithm MD5).Hash
+    if ($InstallerMD5 -ne $LatestDellCommandUpdate.MD5) {
+      Write-Warning 'MD5 verification failed - aborting...'
+      Remove-Item $Installer -Force -ErrorAction Ignore
+      exit 1
+    }
 
     # Install Dell Command Update
     Write-Output 'Installing...'
