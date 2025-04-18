@@ -65,9 +65,11 @@ function Get-InstalledApps {
 function Remove-IncompatibleApps {
   # Check for incompatible products
   $IncompatibleApps = Get-InstalledApps -DisplayNames 'Dell Update', 'Dell Command | Update' `
-    -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update', 'Dell Command | Update for Windows Universal'
+    -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update', 'Dell Command | Update for Windows Universal', 'Dell Command | Update for Windows 10'
+  
+  if ($IncompatibleApps) { Write-Output 'Incompatible applications detected' }
   foreach ($App in $IncompatibleApps) {
-    Write-Output "Attempting to remove program: [$($App.DisplayName)]"
+    Write-Output "Attempting to remove [$($App.DisplayName)]"
     try {
       if ($App.UninstallString -match 'msiexec') {
         $Guid = [regex]::Match($App.UninstallString, '\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}').Value
@@ -129,7 +131,7 @@ function Install-DellCommandUpdate {
   
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal', 'Dell Command | Update for Windows 10').DisplayVersion
   Write-Output "`nInstalled Dell Command Update: $CurrentVersion"
   Write-Output "Latest Dell Command Update: $($LatestDellCommandUpdate.Version)"
 
@@ -140,7 +142,7 @@ function Install-DellCommandUpdate {
     Write-Output 'Downloading...'
     Invoke-WebRequest -Uri $LatestDellCommandUpdate.URL -OutFile $Installer -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
 
-    # Install .NET
+    # Install Dell Command Update
     Write-Output 'Installing...'
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
 
