@@ -97,27 +97,28 @@ function Set-ConfigXML {
     Write-Output 'No configuration file provided - creating default configuration file for installation...'
     try {
       $XML = [XML]@'
-  <Configuration ID="5cf809c5-8f36-4fea-a837-69c7185cca8a">
+  <Configuration ID="0fb449fc-f210-4428-9c7d-be5882ab97aa">
     <Remove All="TRUE"/>
-    <Add OfficeClientEdition="64" Channel="Current" MigrateArch="TRUE">
-      <Product ID="O365BusinessRetail">
-        <Language ID="en-us"/>
-        <ExcludeApp ID="Groove"/>
-        <ExcludeApp ID="Lync"/>
+    <Add OfficeClientEdition="64" Channel="MonthlyEnterprise" MigrateArch="TRUE">
+      <Product ID="O365ProPlusRetail">
+        <Language ID="MatchOS" />
+        <ExcludeApp ID="Groove" />
+        <ExcludeApp ID="Lync" />
+        <ExcludeApp ID="Bing" />
       </Product>
     </Add>
-    <Property Name="SharedComputerLicensing" Value="0"/>
-    <Property Name="FORCEAPPSHUTDOWN" Value="TRUE"/>
-    <Property Name="DeviceBasedLicensing" Value="0"/>
-    <Property Name="SCLCacheOverride" Value="0"/>
-    <Updates Enabled="TRUE"/>
-    <RemoveMSI/>
+    <Property Name="SharedComputerLicensing" Value="0" />
+    <Property Name="FORCEAPPSHUTDOWN" Value="TRUE" />
+    <Property Name="DeviceBasedLicensing" Value="0" />
+    <Property Name="SCLCacheOverride" Value="0" />
+    <Updates Enabled="TRUE" />
+    <RemoveMSI />
     <AppSettings>
-      <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas"/>
-      <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas"/>
-      <User Key="software\microsoft\office\16.0\word\options" Name="defaultformat" Value="" Type="REG_SZ" App="word16" Id="L_SaveWordfilesas"/>
+      <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas" />
+      <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas" />
+      <User Key="software\microsoft\office\16.0\word\options" Name="defaultformat" Value="" Type="REG_SZ" App="word16" Id="L_SaveWordfilesas" />
     </AppSettings>
-    <Display Level="Full" AcceptEULA="TRUE"/>
+    <Display Level="Full" AcceptEULA="TRUE" />
   </Configuration>
 '@
 
