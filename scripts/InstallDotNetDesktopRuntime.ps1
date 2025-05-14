@@ -31,7 +31,7 @@ function Get-Architecture {
   }
 }
 
-function Get-InstalledApp {
+function Get-InstalledApps {
   param([Parameter(Mandatory)][String]$DisplayName)
 
   $RegPaths = @(
