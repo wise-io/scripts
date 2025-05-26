@@ -9,9 +9,6 @@
     Author: Aaron Stevenson
 #>
 
-$Installer = "$env:TEMP\KeeperPasswordManager.appinstaller"
-$DownloadURL = 'https://www.keepersecurity.com/desktop_electron/packages/KeeperPasswordManager.appinstaller'
-
 # Adjust Powershell Settings
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -26,22 +23,23 @@ try {
     Write-Output "`nKeeper Password Manager [$($Installed.Version)] already installed for user $env:USERNAME"
     exit 0
   }
+  
+  # Patterns to omit in winget output
+  $Spinner = ('\', '/', '|', '-' | ForEach-Object { "^\s*\$_\s*$" }) -join '|'
+  $ProgressBars = ('█', '▒' | ForEach-Object { "^.+\$_.+`$" }) -join '|'
+  $BlankLine = '^\s*$'
+  $Skip = "$Spinner|$ProgressBars|$BlankLine"
 
-  # Download
-  Write-Output "`nDownloading Keeper Password Manager..."
-  Invoke-WebRequest -Uri $DownloadURL -OutFile $Installer
-
-  # Install
-  Write-Output 'Installing...'
-  Add-AppxPackage -AppInstallerFile $Installer
+  # Install via winget
+  Write-Output "`nInstalling Keeper Password Manager..."
+  (winget install 9N040SRQ0S8C --source msstore --accept-package-agreements --accept-source-agreements) -split '(\r?\n)' | Where-Object { $_ -notmatch $Skip } | Out-String
   
   # Confirm Installation
   $Installed = Get-AppxPackage -Name 'KeeperSecurityInc.KeeperPasswordManager'
   if ($Installed) { Write-Output "Successfully installed Keeper Password Manager [$($Installed.Version)]" }
   else { throw }
 }
-catch { Write-Warning 'Error installing Keeper Password Manager' }
-finally { 
-  Remove-Item -Path $Installer -Force -ErrorAction SilentlyContinue
-  exit $LASTEXITCODE
+catch { 
+  Write-Warning "Error installing Keeper Password Manager`n$_"
+  exit 1
 }
