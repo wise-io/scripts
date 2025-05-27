@@ -100,7 +100,7 @@ function Set-ConfigXML {
   <Configuration ID="0fb449fc-f210-4428-9c7d-be5882ab97aa">
     <Remove All="TRUE"/>
     <Add OfficeClientEdition="64" Channel="MonthlyEnterprise" MigrateArch="TRUE">
-      <Product ID="O365ProPlusRetail">
+      <Product ID="O365BusinessRetail">
         <Language ID="MatchOS" />
         <ExcludeApp ID="Groove" />
         <ExcludeApp ID="Lync" />
