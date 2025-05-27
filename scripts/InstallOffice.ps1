@@ -12,6 +12,7 @@
     Switch parameter to install 32-bit Office applications with the built-in XML.
   .LINK
     XML Configuration Generator: https://config.office.com/
+    Supported Product IDs: https://learn.microsoft.com/en-us/microsoft-365/troubleshoot/installation/product-ids-supported-office-deployment-click-to-run
   .NOTES
     Author: Aaron J. Stevenson
 #>
