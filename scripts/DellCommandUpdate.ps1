@@ -249,9 +249,8 @@ function Invoke-DellCommandUpdate {
     # Configure DCU automatic updates
     Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
     
-    # Scan for / apply updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/scan -silent'
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable'
+    # Install updates
+    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -forceUpdate=enable -autoSuspendBitLocker=enable -reboot=disable'
   }
   catch {
     Write-Warning 'Unable to apply updates using the dcu-cli.'
