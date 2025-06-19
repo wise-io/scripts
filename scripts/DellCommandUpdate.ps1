@@ -96,10 +96,12 @@ function Install-DellCommandUpdate {
     if ($Arch -like 'arm*') { 
       $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
       $FallbackMD5 = 'c6ed3bc35d7d6d726821a2c25fbbb44d'
+      $FallbackVersion = '5.4.0'
     }
     else { 
       $FallbackDownloadURL = 'https://dl.dell.com/FOLDER12925773M/1/Dell-Command-Update-Windows-Universal-Application_P4DJW_WIN64_5.5.0_A00.EXE'
       $FallbackMD5 = 'a1eb9c7eadb6d9cbfbbe2be13049b299'
+      $FallbackVersion = '5.5.0'
     }
   
     # Set headers for Dell website
@@ -133,6 +135,7 @@ function Install-DellCommandUpdate {
       else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
       $DownloadURL = $DownloadObject.URL
       $MD5 = $DownloadObject.MD5
+      $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
     }
     catch {}
     finally {
@@ -140,12 +143,10 @@ function Install-DellCommandUpdate {
       if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.MD5) { 
         $DownloadURL = $FallbackDownloadURL
         $MD5 = $FallbackMD5
+        $Version = $FallbackVersion
       }
     }
 
-    # Get version from DownloadURL
-    $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
-  
     return @{
       MD5     = $MD5.ToUpper()
       URL     = $DownloadURL
