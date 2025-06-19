@@ -197,10 +197,20 @@ function Install-DellCommandUpdate {
 
 function Install-DotNetDesktopRuntime {
   function Get-LatestDotNetDesktopRuntime {
-    $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
-    $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
-    $Arch = Get-Architecture
-    $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
+    try {
+      $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
+      $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
+      $Arch = Get-Architecture
+      $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
+    }
+    catch {}
+    finally {
+      # Confirm version number format
+      if ($Version -notmatch '^\d+(\.\d+)+$') { 
+        $URL = $null
+        $Version = $null
+      }
+    }
   
     return @{
       URL     = $URL
@@ -209,7 +219,6 @@ function Install-DotNetDesktopRuntime {
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
   $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
   if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
   Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
@@ -220,6 +229,7 @@ function Install-DotNetDesktopRuntime {
     # Download installer
     Write-Output "`n.NET Desktop Runtime installation needed"
     Write-Output 'Downloading...'
+    $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
 
     # Install .NET
@@ -238,6 +248,9 @@ function Install-DotNetDesktopRuntime {
       Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
+  }
+  elseif ($null -eq $LatestDotNet.Version) { 
+    Write-Output "`nUnable to retrieve latest .NET Desktop Runtime version - skipping installation / upgrade"
   }
   else { Write-Output "`n.NET Desktop Runtime installation / upgrade not needed" }
 }
