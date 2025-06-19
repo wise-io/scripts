@@ -99,9 +99,9 @@ function Install-DellCommandUpdate {
       $FallbackVersion = '5.4.0'
     }
     else { 
-      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER12925773M/1/Dell-Command-Update-Windows-Universal-Application_P4DJW_WIN64_5.5.0_A00.EXE'
-      $FallbackMD5 = 'a1eb9c7eadb6d9cbfbbe2be13049b299'
-      $FallbackVersion = '5.5.0'
+      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914128M/1/Dell-Command-Update-Windows-Universal-Application_9M35M_WIN_5.4.0_A00.EXE'
+      $FallbackMD5 = '20650f194900e205848a04f0d2d4d947'
+      $FallbackVersion = '5.4.0'
     }
   
     # Set headers for Dell website
