@@ -109,38 +109,42 @@ function Install-DellCommandUpdate {
       'accept-language' = '*'
     }
   
-    # Attempt to parse Dell website for download page links of latest DCU
-    [String]$DellKB = Invoke-WebRequest -UseBasicParsing -Uri $DellKBURL -Headers $Headers -ErrorAction Ignore
-    $LinkMatches = @($DellKB | Select-String '(https://www\.dell\.com.+driverid=[a-z0-9]+).+>Dell Command \| Update Windows Universal Application<\/a>' -AllMatches).Matches
-    $KBLinks = foreach ($Match in $LinkMatches) { $Match.Groups[1].Value }
+    try {
+      # Attempt to parse Dell website for download page links of latest DCU
+      [String]$DellKB = Invoke-WebRequest -UseBasicParsing -Uri $DellKBURL -Headers $Headers -ErrorAction Ignore
+      $LinkMatches = @($DellKB | Select-String '(https://www\.dell\.com.+driverid=[a-z0-9]+).+>Dell Command \| Update Windows Universal Application<\/a>' -AllMatches).Matches
+      $KBLinks = foreach ($Match in $LinkMatches) { $Match.Groups[1].Value }
   
-    # Attempt to parse Dell website for download URLs for latest DCU
-    $DownloadObjects = foreach ($Link in $KBLinks) {
-      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
-      if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
-        $Url = $Matches[1]
-        if ($DownloadPage -match 'MD5:.*?([a-fA-F0-9]{32})') { $MD5 = $Matches[1] }
-        [PSCustomObject]@{
-          URL = $Url
-          MD5 = $MD5
+      # Attempt to parse Dell website for download URLs for latest DCU
+      $DownloadObjects = foreach ($Link in $KBLinks) {
+        $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
+        if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
+          $Url = $Matches[1]
+          if ($DownloadPage -match 'MD5:.*?([a-fA-F0-9]{32})') { $MD5 = $Matches[1] }
+          [PSCustomObject]@{
+            URL = $Url
+            MD5 = $MD5
+          }
         }
       }
-    }
   
-    # Set download URL / MD5 based on architecture
-    if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
-    else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
-    $DownloadURL = $DownloadObject.URL
-    $MD5 = $DownloadObject.MD5
-
-    # Revert to fallback URL / MD5 if unable to retrieve from Dell
-    if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.MD5) { 
-      $DownloadURL = $FallbackDownloadURL
-      $MD5 = $FallbackMD5
+      # Set download URL / MD5 based on architecture
+      if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
+      else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
+      $DownloadURL = $DownloadObject.URL
+      $MD5 = $DownloadObject.MD5
+    }
+    catch {}
+    finally {
+      # Revert to fallback URL / MD5 if unable to retrieve from Dell
+      if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.MD5) { 
+        $DownloadURL = $FallbackDownloadURL
+        $MD5 = $FallbackMD5
+      }
     }
 
     # Get version from DownloadURL
-    $Version = $DownloadObject.URL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
+    $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
   
     return @{
       MD5     = $MD5.ToUpper()
@@ -250,7 +254,7 @@ function Invoke-DellCommandUpdate {
     Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
     
     # Install updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -forceUpdate=enable -autoSuspendBitLocker=enable -reboot=disable'
+    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable'
   }
   catch {
     Write-Warning 'Unable to apply updates using the dcu-cli.'
