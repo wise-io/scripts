@@ -62,24 +62,23 @@ function Get-InstalledApps {
   return $MatchedApps | Sort-Object { [version]$_.BundleVersion } -Descending
 }
 
-function Remove-IncompatibleApps {
-  # Check for incompatible products
-  $IncompatibleApps = Get-InstalledApps -DisplayNames 'Dell Update', 'Dell Command | Update' `
-    -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update', 'Dell Command | Update for Windows Universal', 'Dell Command | Update for Windows 10'
-  
-  if ($IncompatibleApps) { Write-Output 'Incompatible applications detected' }
-  foreach ($App in $IncompatibleApps) {
-    Write-Output "Attempting to remove [$($App.DisplayName)]"
+function Remove-DellUpdateApps {
+  param([String[]]$DisplayNames = @('Dell Update'))
+
+  # Check for specified products
+  $Apps = Get-InstalledApps -DisplayNames $DisplayNames -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update'
+  foreach ($App in $Apps) {
+    Write-Output "Attempting to remove $($App.DisplayName)..."
     try {
       if ($App.UninstallString -match 'msiexec') {
         $Guid = [regex]::Match($App.UninstallString, '\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}').Value
         Start-Process -NoNewWindow -Wait -FilePath 'msiexec.exe' -ArgumentList "/x $Guid /quiet /qn"
       }
       else { Start-Process -NoNewWindow -Wait -FilePath $App.UninstallString -ArgumentList '/quiet' }
-      Write-Output "Successfully removed $($App.DisplayName)"
+      Write-Output "Successfully removed $($App.DisplayName) [$($App.DisplayVersion)]"
     }
     catch { 
-      Write-Warning "Failed to remove $($App.DisplayName)"
+      Write-Warning "Failed to remove $($App.DisplayName) [$($App.DisplayVersion)]"
       Write-Warning $_
       exit 1
     }
@@ -156,7 +155,7 @@ function Install-DellCommandUpdate {
   
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal', 'Dell Command | Update for Windows 10').DisplayVersion
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update').DisplayVersion
   Write-Output "`nInstalled Dell Command Update: $CurrentVersion"
   Write-Output "Latest Dell Command Update: $($LatestDellCommandUpdate.Version)"
 
@@ -176,12 +175,15 @@ function Install-DellCommandUpdate {
       exit 1
     }
 
+    # Remove existing version to avoid Classic / Universal incompatibilities 
+    if ($CurrentVersion) { Remove-DellUpdateApps -DisplayNames 'Dell Command | Update' }
+
     # Install Dell Command Update
-    Write-Output 'Installing...'
+    Write-Output 'Installing latest...'
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update for Windows Universal').DisplayVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update').DisplayVersion
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
       Write-Output "Successfully installed Dell Command Update [$CurrentVersion]`n"
       Remove-Item $Installer -Force -ErrorAction Ignore 
@@ -292,7 +294,7 @@ if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
 }
 
 # Handle Prerequisites / Dependencies
-Remove-IncompatibleApps
+Remove-DellUpdateApps
 Install-DotNetDesktopRuntime
 
 # Install DCU and available updates
