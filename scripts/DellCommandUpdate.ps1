@@ -155,11 +155,11 @@ function Install-DellCommandUpdate {
   
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update').DisplayVersion
-  Write-Output "`nInstalled Dell Command Update: $CurrentVersion"
-  Write-Output "Latest Dell Command Update: $($LatestDellCommandUpdate.Version)"
+  $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
+  Write-Output "`nInstalled: $($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]"
+  Write-Output "Latest: $($LatestDellCommandUpdate.Version)"
 
-  if ($CurrentVersion -lt $LatestDellCommandUpdate.Version) {
+  if ($CurrentVersion.DisplayVersion -lt $LatestDellCommandUpdate.Version) {
 
     # Download installer
     Write-Output "`nDell Command Update installation needed"
@@ -183,9 +183,9 @@ function Install-DellCommandUpdate {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName 'Dell Command | Update').DisplayVersion
+    $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
-      Write-Output "Successfully installed Dell Command Update [$CurrentVersion]`n"
+      Write-Output "Successfully installed $($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]`n"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
