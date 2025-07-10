@@ -168,7 +168,9 @@ function Install-DellCommandUpdate {
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
   $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
-  Write-Output "`nInstalled: $($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]"
+  $CurrentVersionString = ("$($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]").Trim()
+  Write-Output "`nDell Command Update Version Info`n-----"
+  Write-Output "Installed: $CurrentVersionString"
   Write-Output "Latest: $($LatestDellCommandUpdate.Version)"
 
   if ($CurrentVersion.DisplayVersion -lt $LatestDellCommandUpdate.Version) {
@@ -244,10 +246,11 @@ function Install-DotNetDesktopRuntime {
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
-  if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
-  Write-Output "`nInstalled .NET Desktop Runtime: $CurrentVersion"
-  Write-Output "Latest .NET Desktop Runtime: $($LatestDotNet.Version)"
+  Write-Output "`n.NET Desktop Runtime Info`n-----"
+  Write-Output "Installed: $CurrentVersion"
+  Write-Output "Latest: $($LatestDotNet.Version)"
 
+  if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
   if ($CurrentVersion -lt $LatestDotNet.Version) {
     
     # Download installer
