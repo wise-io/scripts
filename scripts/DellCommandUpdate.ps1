@@ -94,20 +94,28 @@ function Install-DellCommandUpdate {
     $Arch = Get-Architecture
     if ($Arch -like 'arm*') { 
       $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
-      $FallbackMD5 = 'c6ed3bc35d7d6d726821a2c25fbbb44d'
+      $FallbackChecksum = 'b66b27f5c6572574b709591f44c692da5d6954ad7734ba88ac7cb1d08f3ce288'
       $FallbackVersion = '5.4.0'
     }
     else { 
       $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914128M/1/Dell-Command-Update-Windows-Universal-Application_9M35M_WIN_5.4.0_A00.EXE'
-      $FallbackMD5 = '20650f194900e205848a04f0d2d4d947'
+      $FallbackChecksum = '4034ffe101ba6722406ce1e2b43124c91603bedb60fa18028d4165caf74ab47c'
       $FallbackVersion = '5.4.0'
     }
   
     # Set headers for Dell website
     $Headers = @{
-      'accept'          = 'text/html'
-      'accept-encoding' = 'gzip'
-      'accept-language' = '*'
+      'upgrade-insecure-requests' = '1'
+      'user-agent'                = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
+      'accept'                    = 'text/html'
+      'sec-fetch-site'            = 'same-origin'
+      'sec-fetch-mode'            = 'navigate'
+      'sec-fetch-user'            = '?1'
+      'sec-fetch-dest'            = 'document'
+      'referer'                   = "$DellKBURL"
+      'accept-encoding'           = 'gzip'
+      'accept-language'           = '*'
+      'cache-control'             = 'max-age=0'
     }
   
     try {
@@ -121,35 +129,39 @@ function Install-DellCommandUpdate {
         $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
         if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
           $Url = $Matches[1]
-          if ($DownloadPage -match 'MD5:.*?([a-fA-F0-9]{32})') { $MD5 = $Matches[1] }
+          if ($DownloadPage -match 'SHA-256:.*?([a-fA-F0-9]{64})') { $Checksum = $Matches[1] }
           [PSCustomObject]@{
-            URL = $Url
-            MD5 = $MD5
+            URL      = $Url
+            Checksum = $Checksum
           }
         }
       }
   
-      # Set download URL / MD5 based on architecture
-      if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
-      else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
+      # Set download URL / SHA256 checksum based on architecture
+      if ($Arch -like 'arm*') { 
+        $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } 
+      }
+      else { 
+        $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' }
+      }
       $DownloadURL = $DownloadObject.URL
-      $MD5 = $DownloadObject.MD5
+      $Checksum = $DownloadObject.Checksum
       $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
     }
     catch {}
     finally {
-      # Revert to fallback URL / MD5 if unable to retrieve from Dell
-      if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.MD5) { 
+      # Revert to fallback URL / SHA256 checksum if unable to retrieve from Dell
+      if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.Checksum) { 
         $DownloadURL = $FallbackDownloadURL
-        $MD5 = $FallbackMD5
+        $Checksum = $FallbackChecksum
         $Version = $FallbackVersion
       }
     }
 
     return @{
-      MD5     = $MD5.ToUpper()
-      URL     = $DownloadURL
-      Version = $Version
+      Checksum = $Checksum.ToUpper()
+      URL      = $DownloadURL
+      Version  = $Version
     }
   }
   
@@ -166,14 +178,17 @@ function Install-DellCommandUpdate {
     Write-Output 'Downloading...'
     Invoke-WebRequest -Uri $LatestDellCommandUpdate.URL -OutFile $Installer -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
 
-    # Verify MD5 checksum
-    Write-Output 'Verifying MD5 checksum...'
-    $InstallerMD5 = (Get-FileHash -Path $Installer -Algorithm MD5).Hash
-    if ($InstallerMD5 -ne $LatestDellCommandUpdate.MD5) {
-      Write-Warning 'MD5 verification failed - aborting...'
-      Remove-Item $Installer -Force -ErrorAction Ignore
-      exit 1
+    # Verify SHA256 checksum
+    if ($null -ne $LatestDellCommandUpdate.Checksum) {
+      Write-Output 'Verifying SHA256 checksum...'
+      $InstallerChecksum = (Get-FileHash -Path $Installer -Algorithm SHA256).Hash
+      if ($InstallerChecksum -ne $LatestDellCommandUpdate.Checksum) {
+        Write-Warning 'SHA256 checksum verification failed - aborting...'
+        Remove-Item $Installer -Force -ErrorAction Ignore
+        exit 1
+      }
     }
+    else { Write-Warning 'Unable to retrieve checksum from Dell for validation - skipping...' }
 
     # Remove existing version to avoid Classic / Universal incompatibilities 
     if ($CurrentVersion) { Remove-DellUpdateApps -DisplayNames 'Dell Command | Update' }
@@ -204,6 +219,12 @@ function Install-DotNetDesktopRuntime {
       $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
       $Arch = Get-Architecture
       $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
+      $ChecksumURL = "https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-$Version-windows-$Arch-installer"
+
+      # Retrieve SHA-512 checksum
+      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $ChecksumURL -ErrorAction Ignore
+      if ($DownloadPage -match 'id="checksum".*?([a-fA-F0-9]{128})') { $Checksum = $Matches[1] }
+
     }
     catch {}
     finally {
@@ -215,8 +236,9 @@ function Install-DotNetDesktopRuntime {
     }
   
     return @{
-      URL     = $URL
-      Version = $Version
+      Checksum = $Checksum.ToUpper()
+      URL      = $URL
+      Version  = $Version
     }
   }
   
@@ -234,6 +256,18 @@ function Install-DotNetDesktopRuntime {
     $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
 
+    # Verify SHA512 checksum
+    if ($null -ne $LatestDotNet.Checksum) {
+      Write-Output 'Verifying SHA512 checksum...'
+      $InstallerChecksum = (Get-FileHash -Path $Installer -Algorithm SHA512).Hash
+      if ($InstallerChecksum -ne $LatestDotNet.Checksum) {
+        Write-Warning 'SHA512 checksum verification failed - aborting...'
+        Remove-Item $Installer -Force -ErrorAction Ignore
+        exit 1
+      }
+    }
+    else { Write-Warning 'Unable to retrieve checksum from Microsoft for validation - skipping...' }
+    
     # Install .NET
     Write-Output 'Installing...'
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
