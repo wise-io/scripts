@@ -68,7 +68,7 @@ function Get-InstalledApps {
 }
 
 function Remove-DellUpdateApps {
-  param([String[]]$DisplayNames = @('Dell Update'))
+  param([String[]]$DisplayNames)
 
   # Check for specified products
   $Apps = Get-InstalledApps -DisplayNames $DisplayNames -Exclude 'Dell SupportAssist OS Recovery Plugin for Dell Update'
@@ -335,7 +335,7 @@ if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
 }
 
 # Handle Prerequisites / Dependencies
-Remove-DellUpdateApps
+Remove-DellUpdateApps -DisplayNames 'Dell Update'
 Install-DotNetDesktopRuntime
 
 # Install DCU and available updates
