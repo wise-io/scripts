@@ -41,8 +41,18 @@ Script will abort if a system manufacturer other than Dell is detected.
 
 This example downloads and installs Dell Command Update if it isn't already installed. After installation, Dell Command Update will check for and install any Dell updates.
 
+
+
+```
+.\DellCommandUpdate.ps1 -Reboot
+```
+
+This example downloads and installs Dell Command Update if it isn't already installed. After installation, Dell Command Update will check for and install any Dell updates. Once complete, a message will be displayed, and a reboot will be forced after 60 seconds.
+
 ***
 
 ## Parameters
 
-This script has no parameters.
+`-Reboot`
+
+Switch parameter - if specified, notifies the user and forces a reboot after 60 seconds.
