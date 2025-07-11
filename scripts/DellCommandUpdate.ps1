@@ -10,6 +10,11 @@
     Author: Aaron J. Stevenson
 #>
 
+[CmdletBinding()]
+param (
+  [Switch]$Reboot
+)
+
 function Get-Architecture {
   # On PS x86, PROCESSOR_ARCHITECTURE reports x86 even on x64 systems.
   # To get the correct architecture, we need to use PROCESSOR_ARCHITEW6432.
@@ -137,29 +142,28 @@ function Install-DellCommandUpdate {
         }
       }
   
-      # Set download URL / SHA256 checksum based on architecture
-      if ($Arch -like 'arm*') { 
-        $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } 
-      }
-      else { 
-        $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' }
-      }
-      $DownloadURL = $DownloadObject.URL
-      $Checksum = $DownloadObject.Checksum
-      $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
+      # Select correct download object based on architecture
+      if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
+      else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
     }
     catch {}
     finally {
       # Revert to fallback URL / SHA256 checksum if unable to retrieve from Dell
       if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.Checksum) { 
+        Write-Warning 'Unable to retrieve latest version info from Dell - reverting to fallback...'
         $DownloadURL = $FallbackDownloadURL
-        $Checksum = $FallbackChecksum
+        $Checksum = $FallbackChecksum.ToUpper()
         $Version = $FallbackVersion
+      }
+      else {
+        $DownloadURL = $DownloadObject.URL
+        $Checksum = ($DownloadObject.Checksum).ToUpper()
+        $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
       }
     }
 
     return @{
-      Checksum = $Checksum.ToUpper()
+      Checksum = $Checksum
       URL      = $DownloadURL
       Version  = $Version
     }
@@ -171,7 +175,7 @@ function Install-DellCommandUpdate {
   $CurrentVersionString = ("$($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]").Trim()
   Write-Output "`nDell Command Update Version Info`n-----"
   Write-Output "Installed: $CurrentVersionString"
-  Write-Output "Latest: $($LatestDellCommandUpdate.Version)"
+  Write-Output "Latest / Fallback: $($LatestDellCommandUpdate.Version)"
 
   if ($CurrentVersion.DisplayVersion -lt $LatestDellCommandUpdate.Version) {
 
@@ -337,3 +341,10 @@ Install-DotNetDesktopRuntime
 # Install DCU and available updates
 Install-DellCommandUpdate
 Invoke-DellCommandUpdate
+
+# Reboot if specified
+if ($Reboot) {
+  Write-Warning 'Reboot specified - rebooting in 30 seconds...'
+  Start-Process -Wait -NoNewWindow -FilePath 'shutdown.exe' -ArgumentList '/r /f /t 60 /c "This system will restart in 60 seconds to install driver and firmware updates. Please save and close your work." /d p:4:1'
+}
+else { Write-Output 'A reboot may be needed to complete the installation of driver and firmware updates.' }
