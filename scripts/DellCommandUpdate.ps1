@@ -347,4 +347,4 @@ if ($Reboot) {
   Write-Warning 'Reboot specified - rebooting in 60 seconds...'
   Start-Process -Wait -NoNewWindow -FilePath 'shutdown.exe' -ArgumentList '/r /f /t 60 /c "This system will restart in 60 seconds to install driver and firmware updates. Please save and close your work." /d p:4:1'
 }
-else { Write-Output 'A reboot may be needed to complete the installation of driver and firmware updates.' }
+else { Write-Output "`nA reboot may be needed to complete the installation of driver and firmware updates." }
