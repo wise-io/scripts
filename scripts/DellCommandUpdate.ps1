@@ -222,7 +222,7 @@ function Install-DotNetDesktopRuntime {
   function Get-LatestDotNetDesktopRuntime {
     try {
       $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
-      $Version = (Invoke-WebRequest -Uri "$BaseURL/LTS/latest.version" -UseBasicParsing).Content
+      $Version = (Invoke-WebRequest -Uri "$BaseURL/8.0/latest.version" -UseBasicParsing).Content
       $Arch = Get-Architecture
       $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
       $ChecksumURL = "https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-$Version-windows-$Arch-installer"
@@ -249,8 +249,8 @@ function Install-DotNetDesktopRuntime {
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
-  Write-Output "`n.NET Desktop Runtime Info`n-----"
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion | Where-Object { $_ -like '8.*' }
+  Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
 
@@ -258,7 +258,7 @@ function Install-DotNetDesktopRuntime {
   if ($CurrentVersion -lt $LatestDotNet.Version) {
     
     # Download installer
-    Write-Output "`n.NET Desktop Runtime installation needed"
+    Write-Output "`n.NET 8.0 Desktop Runtime installation needed"
     Write-Output 'Downloading...'
     $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
@@ -280,22 +280,22 @@ function Install-DotNetDesktopRuntime {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion
+    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion | Where-Object { $_ -like '8.*' }
     if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
-      Write-Output "Successfully installed .NET Desktop Runtime [$CurrentVersion]"
+      Write-Output "Successfully installed .NET 8.0 Desktop Runtime [$CurrentVersion]"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
-      Write-Warning ".NET Desktop Runtime [$($LatestDotNet.Version)] not detected after installation attempt"
+      Write-Warning ".NET 8.0 Desktop Runtime [$($LatestDotNet.Version)] not detected after installation attempt"
       Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
   }
   elseif ($null -eq $LatestDotNet.Version) { 
-    Write-Output "`nUnable to retrieve latest .NET Desktop Runtime version - skipping installation / upgrade"
+    Write-Output "`nUnable to retrieve latest .NET 8.0 Desktop Runtime version - skipping installation / upgrade"
   }
-  else { Write-Output "`n.NET Desktop Runtime installation / upgrade not needed" }
+  else { Write-Output "`n.NET 8.0 Desktop Runtime installation / upgrade not needed" }
 }
 
 function Invoke-DellCommandUpdate {
