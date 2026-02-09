@@ -249,7 +249,7 @@ function Install-DotNetDesktopRuntime {
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion | Where-Object { $_ -like '8.*' }
+  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime*(x64)').BundleVersion | Where-Object { $_ -like '8.*' }
   Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
