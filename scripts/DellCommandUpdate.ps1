@@ -32,8 +32,8 @@ function Get-Architecture {
 
   switch ($Architecture.ToLowerInvariant()) {
     { ($_ -eq 'amd64') -or ($_ -eq 'x64') } { return 'x64' }
-    { $_ -eq 'x86' } { return 'x86' }
-    { $_ -eq 'arm' } { return 'arm' }
+    # { $_ -eq 'x86' } { return 'x86' } - DCU 5.X doesn't support 32-bit
+    # { $_ -eq 'arm' } { return 'arm' } - DCU 5.X doesn't support 32-bit ARM
     { $_ -eq 'arm64' } { return 'arm64' }
     default { throw "Architecture '$Architecture' not supported." }
   }
@@ -249,7 +249,7 @@ function Install-DotNetDesktopRuntime {
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion | Where-Object { $_ -like '8.*' }
+  $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
   Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
@@ -280,7 +280,7 @@ function Install-DotNetDesktopRuntime {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName 'Microsoft Windows Desktop Runtime').BundleVersion | Where-Object { $_ -like '8.*' }
+    $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
     if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
       Write-Output "Successfully installed .NET 8.0 Desktop Runtime [$CurrentVersion]"
