@@ -1,3 +1,6 @@
+#Requires -Version 5.1
+#Requires -RunAsAdministrator
+
 <#
   .SYNOPSIS
     Installs Dell updates via Dell Command Update
@@ -12,14 +15,16 @@
 
 [CmdletBinding()]
 param (
-  [Switch]$Reboot
+  [Switch]$Reboot,
+  [Switch]$ApplySettingAndUpdate
 )
 
+#region functions
 function Get-Architecture {
   # On PS x86, PROCESSOR_ARCHITECTURE reports x86 even on x64 systems.
   # To get the correct architecture, we need to use PROCESSOR_ARCHITEW6432.
   # PS x64 doesn't define this, so we fall back to PROCESSOR_ARCHITECTURE.
-  # Possible values: amd64, x64, x86, arm64, arm
+  # Possible values: amd64, x64, arm64
   if ($null -ne $ENV:PROCESSOR_ARCHITEW6432) { $Architecture = $ENV:PROCESSOR_ARCHITEW6432 }
   else {     
     if ((Get-CimInstance -ClassName CIM_OperatingSystem -ErrorAction Ignore).OSArchitecture -like 'ARM*') {
@@ -64,7 +69,10 @@ function Get-InstalledApps {
     if ($Exclude -notcontains $App.DisplayName) { $MatchedApps += $App }
   }
 
-  return $MatchedApps | Sort-Object { [version]$_.BundleVersion } -Descending
+  return $MatchedApps | Sort-Object { 
+    if ($_.BundleVersion) { [version]$_.BundleVersion } else { [version]'0.0' }
+  } -Descending
+
 }
 
 function Remove-DellUpdateApps {
@@ -97,14 +105,14 @@ function Install-DellCommandUpdate {
   
     # Set fallback URL based on architecture
     if ($Arch -like 'arm*') { 
-      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
-      $FallbackChecksum = 'b66b27f5c6572574b709591f44c692da5d6954ad7734ba88ac7cb1d08f3ce288'
-      $FallbackVersion = '5.4.0'
+      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER13922742M/1/Dell-Command-Update-Windows-Universal-Application_TYXTK_WINARM64_5.6.0_A00.EXE'
+      $FallbackChecksum = '1D0A86DE060379B6324B1BE35487D9891FFDBF90969B662332A294369A45D656' # SHA256
+      $FallbackVersion = '5.6.0'
     }
     else { 
-      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914128M/1/Dell-Command-Update-Windows-Universal-Application_9M35M_WIN_5.4.0_A00.EXE'
-      $FallbackChecksum = '4034ffe101ba6722406ce1e2b43124c91603bedb60fa18028d4165caf74ab47c'
-      $FallbackVersion = '5.4.0'
+      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER13922692M/1/Dell-Command-Update-Windows-Universal-Application_2WT0J_WIN64_5.6.0_A00.EXE'
+      $FallbackChecksum = 'E09B7FDF8BA5A19A837A95E1183E5A79C006BE2F433909E177E24FD704C26AA1' # SHA256
+      $FallbackVersion = '5.6.0'
     }
   
     # Set headers for Dell website
@@ -170,18 +178,24 @@ function Install-DellCommandUpdate {
   
   $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
+  $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
   $CurrentVersionString = ("$($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]").Trim()
   Write-Output "`nDell Command Update Version Info`n-----"
   Write-Output "Installed: $CurrentVersionString"
   Write-Output "Latest / Fallback: $($LatestDellCommandUpdate.Version)"
 
-  if ($CurrentVersion.DisplayVersion -lt $LatestDellCommandUpdate.Version) {
+  if ([version]$CurrentVersion.DisplayVersion -lt [version]$LatestDellCommandUpdate.Version) {
 
     # Download installer
     Write-Output "`nDell Command Update installation needed"
-    Write-Output 'Downloading...'
+    Write-Output "Downloading $Arch version of DELL Command Update..."
     Invoke-WebRequest -Uri $LatestDellCommandUpdate.URL -OutFile $Installer -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
+
+    # check if file is downloaded
+    if (-not (Test-Path -Path $Installer)) {
+    Write-Warning 'Download failed - installer file not found.'
+    exit 1
+    }
 
     # Verify SHA256 checksum
     if ($null -ne $LatestDellCommandUpdate.Checksum) {
@@ -200,11 +214,16 @@ function Install-DellCommandUpdate {
 
     # Install Dell Command Update
     Write-Output 'Installing latest...'
-    Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
+    $installerProcess = Start-Process -Wait -NoNewWindow -PassThru -FilePath $Installer -ArgumentList '/s'
+    switch ($installerProcess.ExitCode) {
+      0       { Write-Output "Dell Command Update installer returend $($installerProcess.ExitCode) success." }
+      2       { Write-Output "Dell Command Update installer returend $($installerProcess.ExitCode) a restart is required." }
+      Default { Write-Warning "Dell Command Update installer returend an unknown error $($installerProcess.ExitCode)." }
+    }
 
     # Confirm installation
-    $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
-    if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
+    $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
+    if ($CurrentVersion.DisplayVersion -eq $LatestDellCommandUpdate.Version) {
       Write-Output "Successfully installed $($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]`n"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
@@ -240,14 +259,14 @@ function Install-DotNetDesktopRuntime {
     }
   
     return @{
-      Checksum = $Checksum.ToUpper()
+      Checksum = if ($Checksum) { $Checksum.ToUpper() } else { $null }
       URL      = $URL
       Version  = $Version
     }
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
+  $CurrentVersion = (Get-InstalledApps -DisplayNames "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
   Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
@@ -257,9 +276,15 @@ function Install-DotNetDesktopRuntime {
     
     # Download installer
     Write-Output "`n.NET 8.0 Desktop Runtime installation needed"
-    Write-Output 'Downloading...'
+    Write-Output "Downloading $Arch version of NET 8.0 Desktop Runtime..."
     $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
+
+    # check if file is downloaded
+    if (-not (Test-Path -Path $Installer)) {
+    Write-Warning 'Download failed - installer file not found.'
+    exit 1
+    }
 
     # Verify SHA512 checksum
     if ($null -ne $LatestDotNet.Checksum) {
@@ -298,18 +323,21 @@ function Install-DotNetDesktopRuntime {
 
 function Invoke-DellCommandUpdate {
   # Check for DCU CLI
-  $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe").Path
-  if ($null -eq $DCU) {
+  $DCU = (Resolve-Path "$env:SystemDrive\Program Files*\Dell\CommandUpdate\dcu-cli.exe" | Select-Object -First 1).Path
+  if ([string]::IsNullOrEmpty($DCU)) {
     Write-Warning 'Dell Command Update CLI was not detected.'
     exit 1
   }
   
   try {
     # Configure DCU automatic updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
-    
+    $processConfigure = Start-Process -NoNewWindow -Wait -PassThru -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
+    if ($processConfigure.ExitCode -ne 0) { Write-Warning "dcu-cli configure exited with code $($processConfigure.ExitCode)" }
+
+
     # Install updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable'
+    $processApplyUpdates = Start-Process -NoNewWindow -Wait -PassThru -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable'
+    if ($processApplyUpdates.ExitCode -ne 0) { Write-Warning "dcu-cli applyUpdates exited with code $($processApplyUpdates.ExitCode)" }
   }
   catch {
     Write-Warning 'Unable to apply updates using the dcu-cli.'
@@ -317,6 +345,43 @@ function Invoke-DellCommandUpdate {
     exit 1
   }
 }
+
+function Test-PendingReboot {
+  $PendingReboot = $false
+
+  # Check Component Based Servicing
+  if (Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -ErrorAction SilentlyContinue) {
+    $PendingReboot = $true
+  }
+
+  # Check Windows Update
+  if (Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -ErrorAction SilentlyContinue) {
+    $PendingReboot = $true
+  }
+
+  # Check PendingFileRenameOperations
+  if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -ErrorAction SilentlyContinue) {
+    $PendingReboot = $true
+  }
+
+  # Check SCCM Client
+  try {
+    $SCCMReboot = Invoke-CimMethod -Namespace 'root\ccm\ClientSDK' -ClassName CCM_ClientUtilities -MethodName DetermineIfRebootPending -ErrorAction SilentlyContinue
+    if ($SCCMReboot.RebootPending -or $SCCMReboot.IsHardRebootPending) {
+      $PendingReboot = $true
+    }
+  }
+  catch {}
+
+  # Output result
+  if ($PendingReboot) {
+    Write-Warning 'A pending reboot has been detected. A restart is required to complete previous installations.'
+  }
+  else {
+    Write-Output 'No pending reboot detected.'
+  }
+}
+#endregion functions
 
 # Set PowerShell preferences
 Set-Location -Path $env:SystemRoot
@@ -326,11 +391,16 @@ if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.S
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
+#region checks
 # Check device manufacturer
 if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
   Write-Output "`nNot a Dell system. Aborting..."
   exit 0
 }
+
+# Check if we have pending reboot in case of troubleshooting
+Test-PendingReboot
+#endregion checks
 
 # Handle Prerequisites / Dependencies
 $Arch = Get-Architecture
@@ -339,7 +409,11 @@ Install-DotNetDesktopRuntime
 
 # Install DCU and available updates
 Install-DellCommandUpdate
-Invoke-DellCommandUpdate
+
+# Apply settings and updates
+if($ApplySettingAndUpdate){
+  Invoke-DellCommandUpdate
+}
 
 # Reboot if specified
 if ($Reboot) {
