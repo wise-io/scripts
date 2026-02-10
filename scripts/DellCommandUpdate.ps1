@@ -96,7 +96,6 @@ function Install-DellCommandUpdate {
     $DellKBURL = 'https://www.dell.com/support/kbdoc/en-us/000177325/dell-command-update'
   
     # Set fallback URL based on architecture
-    $Arch = Get-Architecture
     if ($Arch -like 'arm*') { 
       $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
       $FallbackChecksum = 'b66b27f5c6572574b709591f44c692da5d6954ad7734ba88ac7cb1d08f3ce288'
@@ -223,7 +222,6 @@ function Install-DotNetDesktopRuntime {
     try {
       $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
       $Version = (Invoke-WebRequest -Uri "$BaseURL/8.0/latest.version" -UseBasicParsing).Content
-      $Arch = Get-Architecture
       $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
       $ChecksumURL = "https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-$Version-windows-$Arch-installer"
 
@@ -335,6 +333,7 @@ if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
 }
 
 # Handle Prerequisites / Dependencies
+$Arch = Get-Architecture
 Remove-DellUpdateApps -DisplayNames 'Dell Update'
 Install-DotNetDesktopRuntime
 
