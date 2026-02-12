@@ -141,7 +141,7 @@ function Install-DellCommandUpdate {
         $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
         if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
           $Url = $Matches[1]
-          if ($DownloadPage -match 'SHA-256:.*?([a-fA-F0-9]{64})') { $Checksum = $Matches[1] }
+          if ($DownloadPage -match 'SHA-256.{1,80}?([a-fA-F0-9]{64})') { $Checksum = $Matches[1] }
           [PSCustomObject]@{
             URL      = $Url
             Checksum = $Checksum
@@ -300,7 +300,11 @@ function Install-DotNetDesktopRuntime {
     
     # Install .NET
     Write-Output 'Installing...'
-    Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
+    $installerProcess = Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
+    switch ($installerProcess.ExitCode) {
+      0       { Write-Output "Desktop Runtime installation returend $($installerProcess.ExitCode) success." }
+      Default { Write-Warning "Desktop Runtime installation returend an unknown error $($installerProcess.ExitCode)." }
+    }
 
     # Confirm installation
     $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
