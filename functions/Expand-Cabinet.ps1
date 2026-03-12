@@ -18,11 +18,8 @@ function Expand-Cabinet {
 
   # Extract cab file
   $Expand = "$env:SystemRoot\System32\expand.exe"
-  & $Expand -r $Path -f:* $DestinationPath | Out-Null
+  & $Expand -r "$Path" -f:* "$DestinationPath" | Out-Null
 
   # Catch errors
-  if ($LASTEXITCODE -ne 0) { 
-    Write-Error "Failed to extract $Path to $DestinationPath"
-    exit 1
-  }
+  if ($LASTEXITCODE -ne 0) { Write-Error "Failed to extract $Path to $DestinationPath" }
 }
