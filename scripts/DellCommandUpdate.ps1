@@ -90,91 +90,79 @@ function Remove-DellUpdateApps {
   }
 }
 
-function Install-DellCommandUpdate {
-  function Get-LatestDellCommandUpdate {
-    # Set KB URL
-    $DellKBURL = 'https://www.dell.com/support/kbdoc/en-us/000177325/dell-command-update'
-  
-    # Set fallback URL based on architecture
-    if ($Arch -like 'arm*') { 
-      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914141M/1/Dell-Command-Update-Windows-Universal-Application_6MK0D_WINARM64_5.4.0_A00.EXE'
-      $FallbackChecksum = 'b66b27f5c6572574b709591f44c692da5d6954ad7734ba88ac7cb1d08f3ce288'
-      $FallbackVersion = '5.4.0'
-    }
-    else { 
-      $FallbackDownloadURL = 'https://dl.dell.com/FOLDER11914128M/1/Dell-Command-Update-Windows-Universal-Application_9M35M_WIN_5.4.0_A00.EXE'
-      $FallbackChecksum = '4034ffe101ba6722406ce1e2b43124c91603bedb60fa18028d4165caf74ab47c'
-      $FallbackVersion = '5.4.0'
-    }
-  
-    # Set headers for Dell website
-    $Headers = @{
-      'upgrade-insecure-requests' = '1'
-      'user-agent'                = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
-      'accept'                    = 'text/html'
-      'sec-fetch-site'            = 'same-origin'
-      'sec-fetch-mode'            = 'navigate'
-      'sec-fetch-user'            = '?1'
-      'sec-fetch-dest'            = 'document'
-      'referer'                   = "$DellKBURL"
-      'accept-encoding'           = 'gzip'
-      'accept-language'           = '*'
-      'cache-control'             = 'max-age=0'
-    }
-  
-    try {
-      # Attempt to parse Dell website for download page links of latest DCU
-      [String]$DellKB = Invoke-WebRequest -UseBasicParsing -Uri $DellKBURL -Headers $Headers -ErrorAction Ignore
-      $LinkMatches = @($DellKB | Select-String '(https://www\.dell\.com.+driverid=[a-z0-9]+).+>Dell Command \| Update Windows Universal Application<\/a>' -AllMatches).Matches
-      $KBLinks = foreach ($Match in $LinkMatches) { $Match.Groups[1].Value }
-  
-      # Attempt to parse Dell website for download URLs for latest DCU
-      $DownloadObjects = foreach ($Link in $KBLinks) {
-        $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $Link -Headers $Headers -ErrorAction Ignore
-        if ($DownloadPage -match '(https://dl\.dell\.com.+Dell-Command-Update.+\.EXE)') { 
-          $Url = $Matches[1]
-          if ($DownloadPage -match 'SHA-256:.*?([a-fA-F0-9]{64})') { $Checksum = $Matches[1] }
-          [PSCustomObject]@{
-            URL      = $Url
-            Checksum = $Checksum
-          }
-        }
-      }
-  
-      # Select correct download object based on architecture
-      if ($Arch -like 'arm*') { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -like '*winarm*' } }
-      else { $DownloadObject = $DownloadObjects | Where-Object { $_.URL -notlike '*winarm*' } }
-    }
-    catch {}
-    finally {
-      # Revert to fallback URL / SHA256 checksum if unable to retrieve from Dell
-      if ($null -eq $DownloadObject.URL -or $null -eq $DownloadObject.Checksum) { 
-        Write-Warning 'Unable to retrieve latest version info from Dell - reverting to fallback...'
-        $DownloadURL = $FallbackDownloadURL
-        $Checksum = $FallbackChecksum.ToUpper()
-        $Version = $FallbackVersion
-      }
-      else {
-        $DownloadURL = $DownloadObject.URL
-        $Checksum = ($DownloadObject.Checksum).ToUpper()
-        $Version = $DownloadURL | Select-String '[0-9]*\.[0-9]*\.[0-9]*' | ForEach-Object { $_.Matches.Value }
-      }
-    }
+function Get-DellCommandUpdate {
+  function Get-DellXML {
+    param([Parameter(Mandatory)][String]$Uri)
 
-    return @{
-      Checksum = $Checksum
-      URL      = $DownloadURL
-      Version  = $Version
+    $Expand = "$env:SystemRoot\System32\expand.exe"
+    $TempCAB = Join-Path -Path $env:TEMP -ChildPath 'temp.cab'
+    $TempXML = Join-Path -Path $env:TEMP -ChildPath 'temp.xml'
+
+    # Remove pre-existing temp files
+    Remove-Item $TempCAB, $TempXML -Force -ErrorAction Ignore
+    
+    # Download and expand cab file
+    Invoke-WebRequest -Uri $Uri -OutFile $TempCAB -UseBasicParsing
+    & $Expand "$TempCAB" "$TempXML" | Out-Null
+
+    # Get xml content
+    [xml]$Content = Get-Content $TempXML
+
+    # Cleanup and return
+    Remove-Item $TempCAB, $TempXML -Force -ErrorAction Ignore
+    return $Content
+  }
+
+  # Download Dell catalog and extract xml
+  $CatalogURL = 'https://downloads.dell.com/catalog/CatalogIndexPC.cab'
+  $CatalogXMLContent = Get-DellXML -Uri $CatalogURL
+
+  # Get system xml from Dell catalog
+  $SystemSKU = (Get-CimInstance -ClassName Win32_ComputerSystem).SystemSKUNumber
+  $SupportedModels = $CatalogXMLContent.ManifestIndex.GroupManifest
+  foreach ($SupportedModel in $SupportedModels) {
+    if ($SystemSKU -match $SupportedModel.SupportedSystems.Brand.Model.systemID) {
+      $ModelXMLContent = Get-DellXML -Uri "https://downloads.dell.com/$($SupportedModel.ManifestInformation.path)"
+      break
     }
   }
   
-  $LatestDellCommandUpdate = Get-LatestDellCommandUpdate
+  # Get latest dell command update
+  $Apps = $ModelXMLContent.Manifest.SoftwareComponent | Where-Object {
+    $_.ComponentType.value -eq 'APAC' -and
+    $_.path -match 'command-update' -and
+    $_.path -match 'universal' -and
+    $_.SupportedOperatingSystems.OperatingSystem.osArch -match $Arch
+  }
+  
+  $Latest = $Apps | Where-Object { $_.SupportedOperatingSystems.OperatingSystem.osArch -match $Arch } | Sort-Object -Property 'vendorVersion' | Select-Object -Last 1
+  if ($Latest) {
+    return @{
+      Version     = $Latest.vendorVersion
+      Date        = $Latest.releaseDate
+      Criticality = $Latest.Criticality.Display.'#cdata-section'
+      Hash        = ($Latest.Cryptography.Hash | Where-Object { $_.Algorithm -eq 'SHA256' }).'#text'
+      URL         = "https://downloads.dell.com/$($Latest.path)"
+    }
+  }
+  else { return $null }
+}
+
+function Install-DellCommandUpdate {
+  
+  # Get latest Dell Command Update
+  $LatestDellCommandUpdate = Get-DellCommandUpdate
+  if ($null -eq $LatestDellCommandUpdate) {
+    Write-Warning 'Unable to retrieve latest Dell Command Update from Dell.'
+    exit 1
+  }
+
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
-  $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
-  $CurrentVersionString = ("$($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]").Trim()
+  $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
+  $CurrentVersionString = ("$($CurrentVersion.DisplayName) $($CurrentVersion.DisplayVersion)").Trim()
   Write-Output "`nDell Command Update Version Info`n-----"
   Write-Output "Installed: $CurrentVersionString"
-  Write-Output "Latest / Fallback: $($LatestDellCommandUpdate.Version)"
+  Write-Output "Latest: $($LatestDellCommandUpdate.Version)"
 
   if ($CurrentVersion.DisplayVersion -lt $LatestDellCommandUpdate.Version) {
 
@@ -183,17 +171,17 @@ function Install-DellCommandUpdate {
     Write-Output 'Downloading...'
     Invoke-WebRequest -Uri $LatestDellCommandUpdate.URL -OutFile $Installer -UserAgent ([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
 
-    # Verify SHA256 checksum
-    if ($null -ne $LatestDellCommandUpdate.Checksum) {
-      Write-Output 'Verifying SHA256 checksum...'
-      $InstallerChecksum = (Get-FileHash -Path $Installer -Algorithm SHA256).Hash
-      if ($InstallerChecksum -ne $LatestDellCommandUpdate.Checksum) {
-        Write-Warning 'SHA256 checksum verification failed - aborting...'
+    # Verify SHA256 Hash
+    if ($null -ne $LatestDellCommandUpdate.Hash) {
+      Write-Output 'Verifying SHA256 Hash...'
+      $InstallerHash = (Get-FileHash -Path $Installer -Algorithm SHA256).Hash
+      if ($InstallerHash -ne $LatestDellCommandUpdate.Hash) {
+        Write-Warning 'SHA256 Hash verification failed - aborting...'
         Remove-Item $Installer -Force -ErrorAction Ignore
         exit 1
       }
     }
-    else { Write-Warning 'Unable to retrieve checksum from Dell for validation - skipping...' }
+    else { Write-Warning 'Unable to retrieve hash from Dell for validation - skipping...' }
 
     # Remove existing version to avoid Classic / Universal incompatibilities 
     if ($CurrentVersion) { Remove-DellUpdateApps -DisplayNames 'Dell Command | Update' }
@@ -203,13 +191,13 @@ function Install-DellCommandUpdate {
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
 
     # Confirm installation
-    $CurrentVersion = Get-InstalledApps -DisplayName 'Dell Command | Update'
+    $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
     if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
-      Write-Output "Successfully installed $($CurrentVersion.DisplayName) [$($CurrentVersion.DisplayVersion)]`n"
+      Write-Output "Successfully installed $($CurrentVersion.DisplayName) $($CurrentVersion.DisplayVersion)`n"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
-      Write-Warning "Dell Command Update [$($LatestDellCommandUpdate.Version)] not detected after installation attempt"
+      Write-Warning "Dell Command Update $($LatestDellCommandUpdate.Version) not detected after installation attempt"
       Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
@@ -223,11 +211,11 @@ function Install-DotNetDesktopRuntime {
       $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
       $Version = (Invoke-WebRequest -Uri "$BaseURL/8.0/latest.version" -UseBasicParsing).Content
       $URL = "$BaseURL/$Version/windowsdesktop-runtime-$Version-win-$Arch.exe"
-      $ChecksumURL = "https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-$Version-windows-$Arch-installer"
+      $HashURL = "https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-$Version-windows-$Arch-installer"
 
-      # Retrieve SHA-512 checksum
-      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $ChecksumURL -ErrorAction Ignore
-      if ($DownloadPage -match 'id="checksum".*?([a-fA-F0-9]{128})') { $Checksum = $Matches[1] }
+      # Retrieve SHA-512 Hash
+      $DownloadPage = Invoke-WebRequest -UseBasicParsing -Uri $HashURL -ErrorAction Ignore
+      if ($DownloadPage -match 'id="checksum".*?([a-fA-F0-9]{128})') { $Hash = ($Matches[1]).ToUpper() }
 
     }
     catch {}
@@ -240,14 +228,14 @@ function Install-DotNetDesktopRuntime {
     }
   
     return @{
-      Checksum = $Checksum.ToUpper()
-      URL      = $URL
-      Version  = $Version
+      Hash    = $Hash
+      URL     = $URL
+      Version = $Version
     }
   }
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
-  $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
+  $CurrentVersion = (Get-InstalledApps -DisplayNames "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
   Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
@@ -261,31 +249,31 @@ function Install-DotNetDesktopRuntime {
     $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
 
-    # Verify SHA512 checksum
-    if ($null -ne $LatestDotNet.Checksum) {
-      Write-Output 'Verifying SHA512 checksum...'
-      $InstallerChecksum = (Get-FileHash -Path $Installer -Algorithm SHA512).Hash
-      if ($InstallerChecksum -ne $LatestDotNet.Checksum) {
-        Write-Warning 'SHA512 checksum verification failed - aborting...'
+    # Verify SHA512 Hash
+    if ($null -ne $LatestDotNet.Hash) {
+      Write-Output 'Verifying SHA512 Hash...'
+      $InstallerHash = (Get-FileHash -Path $Installer -Algorithm SHA512).Hash
+      if ($InstallerHash -ne $LatestDotNet.Hash) {
+        Write-Warning 'SHA512 Hash verification failed - aborting...'
         Remove-Item $Installer -Force -ErrorAction Ignore
         exit 1
       }
     }
-    else { Write-Warning 'Unable to retrieve checksum from Microsoft for validation - skipping...' }
+    else { Write-Warning 'Unable to retrieve Hash from Microsoft for validation - skipping...' }
     
     # Install .NET
     Write-Output 'Installing...'
     Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/install /quiet /norestart'
 
     # Confirm installation
-    $CurrentVersion = (Get-InstalledApps -DisplayName "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
+    $CurrentVersion = (Get-InstalledApps -DisplayNames "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
     if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
-      Write-Output "Successfully installed .NET 8.0 Desktop Runtime [$CurrentVersion]"
+      Write-Output "Successfully installed .NET 8.0 Desktop Runtime $CurrentVersion"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
-      Write-Warning ".NET 8.0 Desktop Runtime [$($LatestDotNet.Version)] not detected after installation attempt"
+      Write-Warning ".NET 8.0 Desktop Runtime $($LatestDotNet.Version) not detected after installation attempt"
       Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
@@ -327,7 +315,7 @@ if ([Net.ServicePointManager]::SecurityProtocol -notcontains 'Tls12' -and [Net.S
 }
 
 # Check device manufacturer
-if ((Get-CimInstance -ClassName Win32_BIOS).Manufacturer -notlike '*Dell*') {
+if ((Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer -notmatch 'Dell') {
   Write-Output "`nNot a Dell system. Aborting..."
   exit 0
 }
