@@ -101,11 +101,15 @@ function Get-DellCommandUpdate {
     # Remove pre-existing temp files
     Remove-Item $TempCAB, $TempXML -Force -ErrorAction Ignore
     
-    # Download and expand cab file
+    # Download cab file
     Invoke-WebRequest -Uri $Uri -OutFile $TempCAB -UseBasicParsing
-    & $Expand "$TempCAB" "$TempXML" | Out-Null
+    if (!(Test-Path $TempCAB)) { 
+      Write-Warning "Unable to download cab file from $Uri"
+      exit 1
+    }
 
-    # Get xml content
+    # Expand cab file and get xml content
+    & $Expand "$TempCAB" "$TempXML" | Out-Null
     [xml]$Content = Get-Content $TempXML
 
     # Cleanup and return
@@ -125,6 +129,12 @@ function Get-DellCommandUpdate {
       $ModelXMLContent = Get-DellXML -Uri "https://downloads.dell.com/$($SupportedModel.ManifestInformation.path)"
       break
     }
+  }
+
+  # Abort if no matching model was found
+  if ($null -eq $ModelXMLContent) {
+    Write-Output 'This Dell system is incompatible with Dell Command Update - aborting...'
+    exit 0
   }
   
   # Get latest dell command update
