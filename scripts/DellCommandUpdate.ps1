@@ -158,6 +158,7 @@ function Install-DellCommandUpdate {
   }
 
   $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDellCommandUpdate.URL -Leaf)
+  $InstallerLog = Join-Path $env:TEMP -ChildPath ((Split-Path $LatestDellCommandUpdate.URL -Leaf) + '.log')
   $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
   $CurrentVersionString = ("$($CurrentVersion.DisplayName) $($CurrentVersion.DisplayVersion)").Trim()
   Write-Output "`nDell Command Update Version Info`n-----"
@@ -188,19 +189,16 @@ function Install-DellCommandUpdate {
 
     # Install Dell Command Update
     Write-Output 'Installing latest...'
-    Start-Process -Wait -NoNewWindow -FilePath $Installer -ArgumentList '/s'
+    $InstallerProcess = Start-Process -Wait -NoNewWindow -PassThru -FilePath $Installer -ArgumentList "/s /l=`"$InstallerLog`""
+    Remove-Item $Installer -Force -ErrorAction Ignore 
 
     # Confirm installation
-    $CurrentVersion = Get-InstalledApps -DisplayNames 'Dell Command | Update'
-    if ($CurrentVersion -match $LatestDellCommandUpdate.Version) {
-      Write-Output "Successfully installed $($CurrentVersion.DisplayName) $($CurrentVersion.DisplayVersion)`n"
-      Remove-Item $Installer -Force -ErrorAction Ignore 
-    }
-    else {
-      Write-Warning "Dell Command Update $($LatestDellCommandUpdate.Version) not detected after installation attempt"
-      Remove-Item $Installer -Force -ErrorAction Ignore 
+    if ($InstallerProcess.ExitCode -ne 0 -and $InstallerProcess.ExitCode -ne 2) {
+      Write-Warning "Dell Command Update installer exited with exit code $($InstallerProcess.ExitCode). The log file at $InstallerLog may provide more information."
       exit 1
     }
+    
+    Write-Output 'Installation successful.'
   }
   else { Write-Output "`nDell Command Update installation / upgrade not needed`n" }
 }
