@@ -142,10 +142,10 @@ function Get-DellCommandUpdate {
     $_.ComponentType.value -eq 'APAC' -and
     $_.path -match 'command-update' -and
     $_.path -match 'universal' -and
-    $_.SupportedOperatingSystems.OperatingSystem.osArch -match $Arch
+    $_.SupportedOperatingSystems.OperatingSystem.osArch -match $SystemArch
   }
   
-  $Latest = $Apps | Where-Object { $_.SupportedOperatingSystems.OperatingSystem.osArch -match $Arch } | Sort-Object -Property 'vendorVersion' | Select-Object -Last 1
+  $Latest = $Apps | Sort-Object -Property 'vendorVersion' | Select-Object -Last 1
   if ($Latest) {
     return @{
       Version     = $Latest.vendorVersion
@@ -214,6 +214,10 @@ function Install-DellCommandUpdate {
 }
 
 function Install-DotNetDesktopRuntime {
+
+  param(
+    [Parameter(Mandatory)][String[]]$Arch
+  )
   function Get-LatestDotNetDesktopRuntime {
     try {
       $BaseURL = 'https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop'
@@ -244,7 +248,7 @@ function Install-DotNetDesktopRuntime {
   
   $LatestDotNet = Get-LatestDotNetDesktopRuntime
   $CurrentVersion = (Get-InstalledApps -DisplayNames "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
-  Write-Output "`n.NET 8.0 Desktop Runtime Info`n-----"
+  Write-Output "`n.NET 8.0 Desktop Runtime ($Arch) Info`n-----"
   Write-Output "Installed: $CurrentVersion"
   Write-Output "Latest: $($LatestDotNet.Version)"
 
@@ -252,7 +256,7 @@ function Install-DotNetDesktopRuntime {
   if ($CurrentVersion -lt $LatestDotNet.Version) {
     
     # Download installer
-    Write-Output "`n.NET 8.0 Desktop Runtime installation needed"
+    Write-Output "`n.NET 8.0 Desktop Runtime ($Arch) installation needed"
     Write-Output 'Downloading...'
     $Installer = Join-Path -Path $env:TEMP -ChildPath (Split-Path $LatestDotNet.URL -Leaf)
     Invoke-WebRequest -Uri $LatestDotNet.URL -OutFile $Installer
@@ -277,11 +281,11 @@ function Install-DotNetDesktopRuntime {
     $CurrentVersion = (Get-InstalledApps -DisplayNames "Microsoft Windows Desktop Runtime*($Arch)").BundleVersion | Where-Object { $_ -like '8.*' }
     if ($CurrentVersion -is [system.array]) { $CurrentVersion = $CurrentVersion[0] }
     if ($CurrentVersion -match $LatestDotNet.Version) {
-      Write-Output "Successfully installed .NET 8.0 Desktop Runtime $CurrentVersion"
+      Write-Output "Successfully installed .NET 8.0 Desktop Runtime $CurrentVersion ($Arch)"
       Remove-Item $Installer -Force -ErrorAction Ignore 
     }
     else {
-      Write-Warning ".NET 8.0 Desktop Runtime $($LatestDotNet.Version) not detected after installation attempt"
+      Write-Warning ".NET 8.0 Desktop Runtime $($LatestDotNet.Version) ($Arch) not detected after installation attempt"
       Remove-Item $Installer -Force -ErrorAction Ignore 
       exit 1
     }
@@ -289,7 +293,7 @@ function Install-DotNetDesktopRuntime {
   elseif ($null -eq $LatestDotNet.Version) { 
     Write-Output "`nUnable to retrieve latest .NET 8.0 Desktop Runtime version - skipping installation / upgrade"
   }
-  else { Write-Output "`n.NET 8.0 Desktop Runtime installation / upgrade not needed" }
+  else { Write-Output "`n.NET 8.0 Desktop Runtime ($Arch) installation / upgrade not needed" }
 }
 
 function Invoke-DellCommandUpdate {
@@ -329,9 +333,10 @@ if ((Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer -notmatch 'De
 }
 
 # Handle Prerequisites / Dependencies
-$Arch = Get-Architecture
+$SystemArch = Get-Architecture
 Remove-DellUpdateApps -DisplayNames 'Dell Update'
-Install-DotNetDesktopRuntime
+Install-DotNetDesktopRuntime -Arch $SystemArch
+if ($SystemArch -eq 'arm64') { Install-DotNetDesktopRuntime -Arch 'x64' }
 
 # Install DCU and available updates
 Install-DellCommandUpdate
