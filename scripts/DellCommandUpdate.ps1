@@ -354,11 +354,9 @@ if ((Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer -notmatch 'De
 # Get system architecture
 $SystemArch = Get-Architecture
 
-# Install DCU
+# Install & run DCU
 Install-DellCommandUpdate
-
-# Run DCU if installed
-if (Get-InstalledApps -DisplayNames 'Dell Command | Update') { Invoke-DellCommandUpdate }
+Invoke-DellCommandUpdate
 
 # Reboot if specified
 if ($Reboot) {
