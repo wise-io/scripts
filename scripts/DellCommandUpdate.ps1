@@ -223,7 +223,7 @@ function Install-DellCommandUpdate {
     
     Write-Output 'Installation successful.'
   }
-  else { Write-Output "`nDell Command Update installation / upgrade not needed`n" }
+  else { Write-Output "`nDell Command Update installation / upgrade not needed" }
 }
 
 function Install-DotNetDesktopRuntime {
@@ -325,10 +325,17 @@ function Invoke-DellCommandUpdate {
   
   try {
     # Configure DCU automatic updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
+    Start-Process -Wait -FilePath $DCU -ArgumentList '/configure -scheduleAction=DownloadInstallAndNotify -updatesNotification=disable -forceRestart=disable -scheduleAuto -silent'
     
+    # Generate temp file for logging
+    $RunLog = Join-Path $env:TEMP -ChildPath ('dcu-' + (Get-Date -f "yyyyMMdd-HHmmss") + '.log')
+
     # Install updates
-    Start-Process -NoNewWindow -Wait -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable'
+    Start-Process -Wait -FilePath $DCU -ArgumentList '/applyUpdates -autoSuspendBitLocker=enable -reboot=disable' -RedirectStandardOutput $RunLog
+
+    # Output filtered log contents
+    Get-Content $RunLog | Where-Object { $_ -notmatch "^(?:Downloading|Downloaded).+\.\.\."}
+    Write-Output "Full log saved to $RunLog."
   }
   catch {
     Write-Warning 'Unable to apply updates using the dcu-cli.'
