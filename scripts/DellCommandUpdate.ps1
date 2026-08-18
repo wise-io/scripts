@@ -102,8 +102,8 @@ function Get-DellCommandUpdate {
     # Download cab file
     Invoke-WebRequest -Uri $Uri -OutFile $TempCAB -UseBasicParsing
     if (!(Test-Path $TempCAB)) { 
-      Write-Warning "Unable to download cab file from $Uri"
-      exit 1
+      Write-Warning "Unable to download Dell Catalog from $Uri"
+      return
     }
 
     # Expand cab file and get xml content
@@ -118,6 +118,7 @@ function Get-DellCommandUpdate {
   # Download Dell catalog and extract xml
   $CatalogURL = 'https://downloads.dell.com/catalog/CatalogIndexPC.cab'
   $CatalogXMLContent = Get-DellXML -Uri $CatalogURL
+  if ($null -eq $CatalogXMLContent) { return }
 
   # Get system xml from Dell catalog
   $SystemSKU = (Get-CimInstance -ClassName Win32_ComputerSystem).SystemSKUNumber
@@ -129,10 +130,10 @@ function Get-DellCommandUpdate {
     }
   }
 
-  # Abort if no matching model was found
+  # Return null if no matching model was found
   if ($null -eq $ModelXMLContent) {
-    Write-Output 'This Dell system is incompatible with Dell Command Update - aborting...'
-    exit 0
+    Write-Output "Unable to locate model $SystemSKU in Dell Catalog."
+    return
   }
   
   # Get latest dell command update
@@ -153,7 +154,10 @@ function Get-DellCommandUpdate {
       URL         = "https://downloads.dell.com/$($Latest.path)"
     }
   }
-  else { return $null }
+  else { 
+    Write-Output "This system is incompatible with Dell Command Update - aborting..."
+    exit 0
+  }
 }
 
 function Install-DellCommandUpdate {
@@ -161,7 +165,7 @@ function Install-DellCommandUpdate {
   # Get latest Dell Command Update
   $LatestDellCommandUpdate = Get-DellCommandUpdate
   if ($null -eq $LatestDellCommandUpdate) {
-    Write-Warning 'Unable to retrieve latest Dell Command Update from Dell.'
+    Write-Warning 'Unable to retrieve latest Dell Command Update.'
     return
   }
 
@@ -354,7 +358,7 @@ $SystemArch = Get-Architecture
 Install-DellCommandUpdate
 
 # Run DCU if installed
-if(Get-InstalledApps -DisplayNames 'Dell Command | Update') { Invoke-DellCommandUpdate }
+if (Get-InstalledApps -DisplayNames 'Dell Command | Update') { Invoke-DellCommandUpdate }
 
 # Reboot if specified
 if ($Reboot) {
