@@ -3,6 +3,7 @@ description: >-
   PowerShell script to silently install the latest Synology Active Backup for
   Business agent.
 layout:
+  width: default
   title:
     visible: true
   description:
@@ -12,6 +13,12 @@ layout:
   outline:
     visible: true
   pagination:
+    visible: true
+  metadata:
+    visible: true
+  tags:
+    visible: true
+  actions:
     visible: true
 ---
 
@@ -27,7 +34,7 @@ The software applications available for Synology devices can be pretty powerful.
 
 <figure><img src="../../.gitbook/assets/activebackup_1607392921_1.png" alt=""><figcaption></figcaption></figure>
 
-**From their** [**Administrator's Guide**](https://global.synologydownload.com/download/Document/Software/AdminGuide/Package/ActiveBackup/All/enu/Synology\_ABB\_admin\_guide\_Windows\_PC\_PS\_enu.pdf)**:**
+**From their** [**Administrator's Guide**](https://global.synologydownload.com/download/Document/Software/AdminGuide/Package/ActiveBackup/All/enu/Synology_ABB_admin_guide_Windows_PC_PS_enu.pdf)**:**
 
 > ABB centralizes data protection across a variety of IT environments, including virtual machines, physical servers, file servers, and personal computers. Administrators can deploy their preferred protection plan single-handedly through ABB's centralized admin console.&#x20;
 >
@@ -84,4 +91,8 @@ Required string parameter that allows you to pass the username required to authe
 **Aliases:** `-Password`
 
 Required string parameter that allows you to pass the password required to authenticate with the Synology device.
+
+{% hint style="warning" %}
+**Note:**&#x20;
+{% endhint %}
 

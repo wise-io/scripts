@@ -12,6 +12,8 @@ description: PowerShell script to silently install and run Dell Command Update (
 
 This script downloads and installs the latest version of Dell Command Update (DCU) if not already installed. It will then use `dcu-cli.exe` to download and install all Dell driver/firmware updates, ignoring reboots.
 
+{% embed url="https://www.dell.com/support/kbdoc/en-us/000177325/dell-command-update" %}
+
 {% embed url="https://www.dell.com/support/product-details/en-us/product/command-update/resources/manuals" %}
 
 **Prerequisites:** This script has no prerequisites.&#x20;
